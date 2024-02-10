@@ -4,42 +4,28 @@ function estimateRequiredCanvasSize(chartData, baseFontSize, minArcAngle) {
   let maxTextWidth = 0;
   const ctx = document.createElement("canvas").getContext("2d");
   ctx.font = `${baseFontSize}px Arial`;
-
-  // Logic to calculate maxTextWidth based on the longest text in chartData...
-
+  // Your logic to calculate maxTextWidth based on the longest text in chartData
   const estimatedRadius = maxTextWidth / minArcAngle; // Arc length = radius * angle
   return Math.ceil(estimatedRadius * 2); // Diameter of the circle
 }
 
 const LayeredPolarChart = () => {
-  const baseFontSize = 10;
-  const minArcAngle = 0.05; // Minimum angle (in radians) required per character
-  const estimatedCanvasSize = estimateRequiredCanvasSize(
-    chartData,
-    baseFontSize,
-    minArcAngle,
-  );
-
-  const originalCanvasWidth = 1920;
-  const originalCanvasHeight = 1920;
-  const newCanvasWidth = Math.max(originalCanvasWidth, estimatedCanvasSize);
-  const newCanvasHeight = Math.max(originalCanvasHeight, estimatedCanvasSize);
   const canvasRef = useRef(null);
+  const newCanvasWidth = 1250; // Adapt as needed
+  const newCanvasHeight = 1250; // Adapt as needed
 
   useEffect(() => {
-    if (canvasRef.current) {
-      const ctx = canvasRef.current.getContext("2d");
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
       const centerX = newCanvasWidth / 2;
       const centerY = newCanvasHeight / 2;
-      const maxRadius = (Math.min(newCanvasWidth, newCanvasHeight) / 2) * 0.9; // Adjust as needed
+      const maxRadius = (Math.min(newCanvasWidth, newCanvasHeight) / 2) * 0.98;
 
-      // Clear the canvas and draw the chart using the chartData
-      ctx.clearRect(0, 0, newCanvasWidth, newCanvasHeight); // Use newCanvasWidth and newCanvasHeight
-      drawChart(ctx, centerX, centerY, maxRadius, chartData); // Assume drawChart is defined elsewhere
+      drawChart(ctx, centerX, centerY, maxRadius, chartData);
     }
-  }, [newCanvasWidth, newCanvasHeight]); // Add any other dependencies if needed
+  }, [newCanvasWidth, newCanvasHeight]); // Redraw if canvas size changes
 
-  // You must return the canvas element for it to render
   return (
     <canvas ref={canvasRef} width={newCanvasWidth} height={newCanvasHeight} />
   );
@@ -47,188 +33,310 @@ const LayeredPolarChart = () => {
 
 const chartData = [
   {
-    name: "Sustainability",
-    color: "#007940",
+    name: "Branch 3",
+    color: "#FFD730",
+    flipText: true, // or true, depending on the community position
+    heightAdjustment: 10, // Height adjustment for the layer
     onionLayers: [
       {
         wedgeLayers: [
-          { color: "#00AD5C" },
-          { color: "#00AD5C" },
-          { color: "#00AD5C" },
+          { color: "#FFF2BC", labels: ["Lorem Ipsum"] },
+          { color: "#FFF2BC", labels: ["Lorem Ipsum"] },
+          { color: "#FFF2BC", labels: ["Lorem Ipsum"] },
         ],
       },
       {
         wedgeLayers: [
-          { color: "#00AD5C" },
-          { color: "#00AD5C" },
-          { color: "#00AD5C" },
+          {
+            color: "#EDD575",
+            labels: [
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+            ],
+          },
+          {
+            color: "#EDD575",
+            labels: [
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+            ],
+          },
+          {
+            color: "#EDD575",
+            labels: [
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+            ],
+          },
         ],
       },
       {
         wedgeLayers: [
-          { color: "#00AD5C" },
-          { color: "#00AD5C" },
-          { color: "#00AD5C" },
+          { color: "#FFE066", labels: ["Lorem Ipsum"] },
+          { color: "#FFE066", labels: ["Lorem Ipsum"] },
+          { color: "#FFE066", labels: ["Lorem Ipsum"] },
         ],
       },
       {
-        wedgeLayers: [{ color: "#007940" }],
+        wedgeLayers: [
+          {
+            color: "#FFD730",
+            labels: [
+              "What is the purpose of your organization and how can a vision bring that to life?",
+            ],
+          },
+        ],
       },
     ],
   },
   {
-    name: "Health Tech",
+    name: "Branch 4",
     color: "#BF2C42",
+    flipText: true, // or true, depending on the community position
+    heightAdjustment: 10, // Height adjustment for the layer
     onionLayers: [
       {
         wedgeLayers: [
-          { color: "#E87D8D" },
-          { color: "#E87D8D" },
-          { color: "#E87D8D" },
+          { color: "#EDC6CC", labels: ["Lorem Ipsum"] },
+          { color: "#EDC6CC", labels: ["Lorem Ipsum"] },
+          { color: "#EDC6CC", labels: ["Lorem Ipsum"] },
         ],
       },
       {
         wedgeLayers: [
-          { color: "#E87D8D" },
-          { color: "#E87D8D" },
-          { color: "#E87D8D" },
+          {
+            color: "#DB8894",
+            labels: [
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+            ],
+          },
+          {
+            color: "#DB8894",
+            labels: [
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+            ],
+          },
+          {
+            color: "#DB8894",
+            labels: [
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+            ],
+          },
         ],
       },
       {
         wedgeLayers: [
-          { color: "#E87D8D" },
-          { color: "#E87D8D" },
-          { color: "#E87D8D" },
+          { color: "#E87D8D", labels: ["Lorem Ipsum"] },
+          { color: "#E87D8D", labels: ["Lorem Ipsum"] },
+          { color: "#E87D8D", labels: ["Lorem Ipsum"] },
         ],
       },
       {
-        wedgeLayers: [{ color: "#BF2C42", labels: ["Initiative B1"] }],
+        wedgeLayers: [
+          {
+            color: "#E14159",
+            labels: [
+              "What is the purpose of your organization and how can a vision bring that to life?",
+            ],
+          },
+        ],
       },
     ],
   },
   {
-    name: "Digital Tech",
-    color: "#004288",
+    name: "Branch 1",
+    color: "#007940",
+    flipText: true, // or true, depending on the community position
+    heightAdjustment: 10, // Height adjustment for the layer
     onionLayers: [
+      {
+        wedgeLayers: [
+          { color: "#BFEDD7", labels: ["Lorem Ipsum"] },
+          { color: "#BFEDD7", labels: ["Lorem Ipsum"] },
+          { color: "#BFEDD7", labels: ["Lorem Ipsum"] },
+        ],
+      },
+      {
+        wedgeLayers: [
+          {
+            color: "#94E8C1",
+            labels: [
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+            ],
+          },
+          {
+            color: "#94E8C1",
+            labels: [
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+            ],
+          },
+          {
+            color: "#94E8C1",
+            labels: [
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+            ],
+          },
+        ],
+      },
+      {
+        wedgeLayers: [
+          { color: "#42D791", labels: ["Lorem Ipsum"] },
+          { color: "#42D791", labels: ["Lorem Ipsum"] },
+          { color: "#42D791", labels: ["Lorem Ipsum"] },
+        ],
+      },
+      {
+        wedgeLayers: [
+          {
+            color: "#00AD5C",
+            labels: [
+              "What is the purpose of your organization and how can a vision bring that to life?",
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    name: "Branch 2",
+    color: "#004288",
+    flipText: true, // or true, depending on the community position
+    heightAdjustment: 10, // Height adjustment for the layer
+    onionLayers: [
+      {
+        wedgeLayers: [
+          {
+            color: "#B1D0F1",
+            labels: ["Lorem Ipsum"],
+          },
+          { color: "#B1D0F1", labels: ["Lorem Ipsum"] },
+          { color: "#B1D0F1", labels: ["Lorem Ipsum"] },
+        ],
+      },
+      {
+        wedgeLayers: [
+          {
+            color: "#7FB7F4",
+            labels: [
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+            ],
+          },
+          {
+            color: "#7FB7F4",
+            labels: [
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+            ],
+          },
+          {
+            color: "#7FB7F4",
+            labels: [
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+              "Lorem Ipsum",
+            ],
+          },
+        ],
+      },
+      {
+        wedgeLayers: [
+          { color: "#66B0FF", labels: ["Lorem Ipsum"] },
+          { color: "#66B0FF", labels: ["Lorem Ipsum"] },
+          { color: "#66B0FF", labels: ["Lorem Ipsum"] },
+        ],
+      },
       {
         wedgeLayers: [
           {
             color: "#248EFF",
             labels: [
-              "Initiative A1ahfkjsdhfkjashdfkjha",
-              "Initiative A2",
-              "Initiative A3",
-              "Initiative A1",
-              "Initiative A2",
-              "Initiative A3",
+              "What is the purpose of your organization and how can a vision bring that to life?",
             ],
           },
-          { color: "#66B0FF", labels: ["Initiative B1"] },
         ],
-      },
-      {
-        wedgeLayers: [
-          { color: "#248EFF" },
-          { color: "#248EFF" },
-          { color: "#248EFF" },
-        ],
-      },
-      {
-        wedgeLayers: [
-          { color: "#248EFF" },
-          { color: "#248EFF" },
-          { color: "#248EFF" },
-        ],
-      },
-      {
-        wedgeLayers: [{ color: "#004288", labels: ["Initiative B1"] }],
-      },
-    ],
-  },
-  {
-    name: "Entrepreneurship",
-    color: "#FFD730",
-    onionLayers: [
-      {
-        wedgeLayers: [
-          { color: "#FFE066" },
-          { color: "#FFE066" },
-          { color: "#FFE066" },
-        ],
-      },
-      {
-        wedgeLayers: [
-          { color: "#FFE066" },
-          { color: "#FFE066" },
-          { color: "#FFE066" },
-        ],
-      },
-      {
-        wedgeLayers: [
-          { color: "#FFE066" },
-          { color: "#FFE066" },
-          { color: "#FFE066" },
-        ],
-      },
-      {
-        wedgeLayers: [{ color: "#FFD730" }],
       },
     ],
   },
 ];
 
 function drawChart(ctx, centerX, centerY, maxRadius, chartData) {
-  // Now chartData is passed as a parameter
-  const innerCircleRadius = 75; // Set the radius for the inner circle
-  const bannerWidth = 40; // Set the width for the banners
+  // Save the current context state (so we can restore it later)
+  ctx.save();
 
-  // Clear the canvas
-  ctx.clearRect(0, 0, centerX * 2, centerY * 2);
+  // Clear the entire canvas
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-  // Draw the inner circle with label
-  drawInnerCircleWithLabel(ctx, centerX, centerY, innerCircleRadius, "ICDK");
+  // Move the rotation point to the center of the canvas
+  ctx.translate(centerX, centerY);
 
-  // Draw community banners
+  // Rotate the canvas 45 degrees clockwise
+  ctx.rotate((-315 * Math.PI) / 180);
+
+  // Move the rotation point back to the top left corner of the canvas
+  ctx.translate(-centerX, -centerY);
+
+  // Draw the main sections of the chart which will be rotated
   drawCommunityBanners(
     ctx,
     centerX,
     centerY,
-    innerCircleRadius,
-    bannerWidth,
+    125, // innerCircleRadius
+    75, // bannerWidth
     chartData,
   );
-
-  // Draw text labels on banners
   drawTextLabels(
     ctx,
     centerX,
     centerY,
-    innerCircleRadius,
-    bannerWidth,
+    125, // innerCircleRadius
+    75, // bannerWidth
     chartData,
   );
-
-  // Draw the main sections of the chart
   drawCommunitySections(
     ctx,
     centerX,
     centerY,
     maxRadius,
     chartData,
-    innerCircleRadius,
-    bannerWidth,
+    125, // innerCircleRadius
+    75, // bannerWidth
   );
 
-  // Draw white lines within the community sections
-  drawHorizontalWhiteLines(
-    ctx,
-    centerX,
-    centerY,
-    maxRadius,
-    chartData,
-    innerCircleRadius,
-    bannerWidth,
-  );
+  // Restore the context to its original state before drawing the inner circle
+  ctx.restore();
+
+  // Draw the unrotated inner circle with label
+  drawInnerCircleWithLabel(ctx, centerX, centerY, 126, "ORG"); // The inner circle radius is assumed to be 125
 }
 
 function drawInnerCircleWithLabel(ctx, centerX, centerY, radius, label) {
@@ -284,8 +392,8 @@ function drawTextLabels(
 
     // Begin drawing curved text for each community
     ctx.save(); // Save the current state before modifications
-    ctx.fillStyle = "black"; // Text color
-    ctx.font = "16px Arial"; // Change as needed
+    ctx.fillStyle = "white"; // Text color
+    ctx.font = "24px Arial"; // Change as needed
     ctx.textBaseline = "middle"; // Align text vertically center
 
     const arcLength = endAngle - startAngle;
@@ -333,68 +441,107 @@ function drawWedgeLabels(
   endAngle,
   innerRadius,
   outerRadius,
+  flipText,
 ) {
-  // Constants for adjustments
-  const fontSize = 14; // Set the font size
-  const lineHeight = fontSize * 1.2; // Line height for multi-line text
-  const padding = 5; // Padding from the inner radius
+  const baseLineHeight = 16; // Base line height which can be adjusted
+  const padding = 5; // Base padding from the edge of the wedge
+  let currentRadius = innerRadius + padding; // Start at the inner radius plus padding
 
-  // Loop through each label in the wedge
-  labels.forEach((label, labelIndex) => {
-    // Split the label into words and prepare to chunk them into lines
-    const words = label.split(" ");
-    const lines = [];
+  ctx.fillStyle = "black"; // Ensure text color is set to black
+  ctx.textAlign = "center"; // Center align text
+  ctx.textBaseline = "middle"; // Align text in the middle vertically
+
+  labels.forEach((label) => {
+    let words = label.split(" ");
+    let lines = [];
     let currentLine = words[0];
 
-    // Set font for measurement
-    ctx.font = `${fontSize}px Arial`;
+    let arcLength =
+      ((innerRadius + outerRadius) / 2) * (endAngle - startAngle) * 1 -
+      2 * padding;
 
     words.slice(1).forEach((word) => {
-      const testLine = currentLine + " " + word;
-      const metrics = ctx.measureText(testLine);
-      if (metrics.width > outerRadius - innerRadius) {
+      let testLine = currentLine + " " + word;
+      let metrics = ctx.measureText(testLine);
+      let testWidth = metrics.width;
+
+      if (testWidth > arcLength) {
         lines.push(currentLine);
         currentLine = word;
       } else {
         currentLine = testLine;
       }
     });
-    lines.push(currentLine); // Push the last line
 
-    // Calculate the height of the text block
-    const textBlockHeight = lines.length * lineHeight;
-    let currentRadius = innerRadius + padding + labelIndex * textBlockHeight;
+    lines.push(currentLine);
 
-    // Draw each line of text
-    lines.forEach((line, i) => {
-      // Calculate the angle to draw the text
-      const angle = startAngle + (endAngle - startAngle) / 2;
-      // Calculate the text's position
-      const x = centerX + (currentRadius + i * lineHeight) * Math.cos(angle);
-      const y = centerY + (currentRadius + i * lineHeight) * Math.sin(angle);
+    if (flipText) {
+      lines = lines.reverse();
+    }
 
-      // Save context and move to the text's position
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(angle - Math.PI / 2); // Rotate context
+    lines.forEach((line) => {
+      const lineRadius = currentRadius + baseLineHeight / 2; // Center the text vertically in the line
+      drawCurvedWedgeLabel(
+        ctx,
+        line,
+        centerX,
+        centerY,
+        lineRadius,
+        startAngle,
+        endAngle,
+      );
 
-      // Check text direction and reverse if necessary
-      if (angle > Math.PI / 2 && angle < (3 * Math.PI) / 2) {
-        ctx.rotate(Math.PI); // Rotate text 180 degrees
-        ctx.textAlign = "center";
-        ctx.fillText(line, 0, 0); // Draw text reversed
-      } else {
-        ctx.textAlign = "center";
-        ctx.fillText(line, 0, 0); // Draw text normally
-      }
-
-      // Restore context
-      ctx.restore();
+      // Increment the radius for the next line to be drawn
+      currentRadius += baseLineHeight;
     });
 
-    // Update the current radius for the next label
-    currentRadius += textBlockHeight + padding;
+    // Add extra padding after each label
+    currentRadius += padding;
   });
+}
+
+function drawCurvedWedgeLabel(
+  ctx,
+  text,
+  centerX,
+  centerY,
+  radius,
+  startAngle,
+  endAngle,
+) {
+  const textLength = text.length;
+  const rangeAngle = endAngle - startAngle;
+
+  let fontSize = 14; // Start with the maximum font size
+  ctx.font = `${fontSize}px Arial`; // Set the initial font
+
+  // Ensure the text is centered along the arc
+  let totalTextWidth = 0;
+  for (let i = 0; i < textLength; i++) {
+    totalTextWidth += ctx.measureText(text[i]).width;
+  }
+  const totalTextAngle = totalTextWidth / radius;
+  let currentAngle = startAngle + (rangeAngle - totalTextAngle) / 2;
+
+  // Draw each character
+  for (let i = 0; i < textLength; i++) {
+    const character = text[i];
+    const charWidth = ctx.measureText(character).width;
+    const charAngle = charWidth / radius;
+
+    // Calculate the character's position
+    const x = centerX + radius * Math.cos(currentAngle + charAngle / 2);
+    const y = centerY + radius * Math.sin(currentAngle + charAngle / 2);
+
+    // Rotate the canvas to draw the character upright
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(currentAngle + charAngle / 2 + Math.PI / 2);
+    ctx.fillText(character, 0, 0);
+    ctx.restore();
+
+    currentAngle += charAngle; // Increment the angle by the character's width
+  }
 }
 
 //WEDGE BELOW
@@ -413,40 +560,29 @@ function drawCommunitySections(
   chartData.forEach((community, communityIndex) => {
     const communityAngleStart = communityIndex * anglePerCommunity;
     const communityAngleEnd = communityAngleStart + anglePerCommunity;
+    const heightAdjustment = community.heightAdjustment || 0;
 
-    // Calculate the total radius available for vertical layers
-    const verticalLayerTotalRadius =
-      maxRadius - innerCircleRadius - bannerWidth;
+    let previousLayerOuterRadius = innerCircleRadius + bannerWidth;
 
-    // Iterate over each vertical layer (onionLayer)
-    community.onionLayers.forEach((verticalLayer, verticalLayerIndex) => {
-      const verticalLayerStartRadius =
-        innerCircleRadius +
-        bannerWidth +
-        (verticalLayerTotalRadius * verticalLayerIndex) /
-          community.onionLayers.length;
-      const verticalLayerEndRadius =
-        innerCircleRadius +
-        bannerWidth +
-        (verticalLayerTotalRadius * (verticalLayerIndex + 1)) /
-          community.onionLayers.length;
+    community.onionLayers.forEach((layer, layerIndex) => {
+      const layerHeight =
+        (maxRadius - previousLayerOuterRadius) /
+          (community.onionLayers.length - layerIndex) +
+        heightAdjustment;
+      const layerOuterRadius = previousLayerOuterRadius + layerHeight;
 
-      // Now, iterate over each wedge within the vertical layer
-      const anglePerWedge =
-        (communityAngleEnd - communityAngleStart) /
-        verticalLayer.wedgeLayers.length;
-
-      verticalLayer.wedgeLayers.forEach((wedgeLayer, wedgeLayerIndex) => {
+      layer.wedgeLayers.forEach((wedgeLayer, wedgeLayerIndex) => {
         const wedgeStartAngle =
-          communityAngleStart + anglePerWedge * wedgeLayerIndex;
-        const wedgeEndAngle = wedgeStartAngle + anglePerWedge;
+          communityAngleStart +
+          (anglePerCommunity * wedgeLayerIndex) / layer.wedgeLayers.length;
+        const wedgeEndAngle =
+          wedgeStartAngle + anglePerCommunity / layer.wedgeLayers.length;
 
-        // Draw the wedge
         ctx.beginPath();
         ctx.arc(
           centerX,
           centerY,
-          verticalLayerEndRadius,
+          layerOuterRadius,
           wedgeStartAngle,
           wedgeEndAngle,
           false,
@@ -454,7 +590,7 @@ function drawCommunitySections(
         ctx.arc(
           centerX,
           centerY,
-          verticalLayerStartRadius,
+          previousLayerOuterRadius,
           wedgeEndAngle,
           wedgeStartAngle,
           true,
@@ -463,28 +599,24 @@ function drawCommunitySections(
         ctx.fillStyle = wedgeLayer.color;
         ctx.fill();
 
-        // Draw white stroke between wedges
-        if (wedgeLayerIndex > 0) {
-          // Skip the first wedge to avoid double drawing
+        // Draw vertical lines between wedges
+        if (wedgeLayerIndex < layer.wedgeLayers.length) {
           ctx.beginPath();
           ctx.moveTo(
-            centerX + verticalLayerStartRadius * Math.cos(wedgeStartAngle),
-            centerY + verticalLayerStartRadius * Math.sin(wedgeStartAngle),
+            centerX + layerOuterRadius * Math.cos(wedgeEndAngle),
+            centerY + layerOuterRadius * Math.sin(wedgeEndAngle),
           );
           ctx.lineTo(
-            centerX + verticalLayerEndRadius * Math.cos(wedgeStartAngle),
-            centerY + verticalLayerEndRadius * Math.sin(wedgeStartAngle),
+            centerX + previousLayerOuterRadius * Math.cos(wedgeEndAngle),
+            centerY + previousLayerOuterRadius * Math.sin(wedgeEndAngle),
           );
           ctx.strokeStyle = "white";
-          ctx.lineWidth = 2; // Adjust for desired stroke width
+          ctx.lineWidth = 4;
           ctx.stroke();
         }
-        // Determine the radii for the text labels
-        const innerTextRadius = verticalLayerStartRadius + 10; // Add some margin
-        const outerTextRadius = verticalLayerEndRadius - 10; // Subtract some margin
 
-        // Draw the text labels inside the wedge, if they exist
-        if (wedgeLayer.labels && wedgeLayer.labels.length) {
+        // Draw labels inside the wedge
+        if (wedgeLayer.labels && wedgeLayer.labels.length > 0) {
           drawWedgeLabels(
             ctx,
             wedgeLayer.labels,
@@ -492,13 +624,57 @@ function drawCommunitySections(
             centerY,
             wedgeStartAngle,
             wedgeEndAngle,
-            innerTextRadius,
-            outerTextRadius,
+            previousLayerOuterRadius + 10, // innerTextRadius with some margin
+            layerOuterRadius - 10, // outerTextRadius with some margin subtracted
+            community.flipText,
           );
         }
       });
+
+      // Draw horizontal white lines after each layer
+      if (layerIndex < community.onionLayers.length - 1) {
+        ctx.beginPath();
+        ctx.arc(
+          centerX,
+          centerY,
+          layerOuterRadius,
+          communityAngleStart,
+          communityAngleEnd,
+        );
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 4;
+        ctx.shadowColor = "rgb(0, 0, 0, 1)";
+        ctx.shadowBlur = "15";
+        ctx.stroke();
+        ctx.shadowBlur = "0";
+      }
+
+      // Prepare for next layer
+      previousLayerOuterRadius = layerOuterRadius;
     });
+
+    // Draw the last vertical line for each community
+    ctx.beginPath();
+    ctx.moveTo(
+      centerX + maxRadius * Math.cos(communityAngleEnd),
+      centerY + maxRadius * Math.sin(communityAngleEnd),
+    );
+    ctx.lineTo(
+      centerX + innerCircleRadius * Math.cos(communityAngleEnd),
+      centerY + innerCircleRadius * Math.sin(communityAngleEnd),
+    );
+    ctx.stroke();
   });
+
+  // Draw the last separating line for the entire chart
+  const lastCommunityAngleEnd = totalCommunities * anglePerCommunity;
+  ctx.beginPath();
+  ctx.moveTo(centerX, centerY);
+  ctx.lineTo(
+    centerX + maxRadius * Math.cos(lastCommunityAngleEnd),
+    centerY + maxRadius * Math.sin(lastCommunityAngleEnd),
+  );
+  ctx.stroke();
 }
 
 function drawCurvedText(
@@ -555,48 +731,6 @@ function drawCurvedText(
 
     currentAngle += charWidth / radius; // Increment angle by character's width
   }
-}
-
-function drawHorizontalWhiteLines(
-  ctx,
-  centerX,
-  centerY,
-  maxRadius,
-  communities,
-  innerCircleRadius,
-  bannerWidth,
-) {
-  communities.forEach((community, communityIndex) => {
-    const anglePerCommunity = (2 * Math.PI) / communities.length;
-    const communityStartAngle = communityIndex * anglePerCommunity;
-    const communityEndAngle = communityStartAngle + anglePerCommunity;
-
-    community.onionLayers.forEach((verticalLayer, verticalLayerIndex) => {
-      const startRadius =
-        (verticalLayerIndex / community.onionLayers.length) *
-          (maxRadius - innerCircleRadius - bannerWidth) +
-        innerCircleRadius +
-        bannerWidth;
-      const endRadius =
-        ((verticalLayerIndex + 1) / community.onionLayers.length) *
-          (maxRadius - innerCircleRadius - bannerWidth) +
-        innerCircleRadius +
-        bannerWidth;
-
-      // Draw a white line at the end of each horizontal layer
-      ctx.beginPath();
-      ctx.arc(
-        centerX,
-        centerY,
-        endRadius,
-        communityStartAngle,
-        communityEndAngle,
-      );
-      ctx.strokeStyle = "white";
-      ctx.lineWidth = 2; // Set the line width to make sure it's visible
-      ctx.stroke();
-    });
-  });
 }
 
 export default LayeredPolarChart;
