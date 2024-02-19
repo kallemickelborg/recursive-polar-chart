@@ -1,0 +1,194 @@
+[
+  {
+    "name": "Branch 3",
+    "color": "#FFD730",
+    "flipText": true,
+    "heightAdjustment": 10,
+    "onionLayers": [
+      {
+        "wedgeLayers": [
+          { "color": "#FFF2BC", "labels": ["Lorem Ipsum"] },
+          { "color": "#FFF2BC", "labels": ["Lorem Ipsum"] },
+          { "color": "#FFF2BC", "labels": ["Lorem Ipsum"] }
+        ]
+      },
+      {
+        "wedgeLayers": [
+          {
+            "color": "#EDD575",
+            "labels": ["Lorem Ipsum"]
+          },
+          {
+            "color": "#EDD575",
+            "labels": ["Lorem Ipsum"]
+          },
+          {
+            "color": "#EDD575",
+            "labels": ["Lorem Ipsum"]
+          }
+        ]
+      },
+      {
+        "wedgeLayers": [
+          { "color": "#FFE066", "labels": ["Lorem Ipsum"] },
+          { "color": "#FFE066", "labels": ["Lorem Ipsum"] },
+          { "color": "#FFE066", "labels": ["Lorem Ipsum"] }
+        ]
+      },
+      {
+        "wedgeLayers": [
+          {
+            "color": "#FFD730",
+            "labels": [
+              "What is the purpose of your organization and how can a vision bring that to life?"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Branch 4",
+    "color": "#BF2C42",
+    "flipText": true,
+    "heightAdjustment": 10,
+    "onionLayers": [
+      {
+        "wedgeLayers": [
+          { "color": "#EDC6CC", "labels": ["Lorem Ipsum"] },
+          { "color": "#EDC6CC", "labels": ["Lorem Ipsum"] },
+          { "color": "#EDC6CC", "labels": ["Lorem Ipsum"] }
+        ]
+      },
+      {
+        "wedgeLayers": [
+          {
+            "color": "#DB8894",
+            "labels": ["Lorem Ipsum"]
+          },
+          {
+            "color": "#DB8894",
+            "labels": ["Lorem Ipsum"]
+          },
+          {
+            "color": "#DB8894",
+            "labels": ["Lorem Ipsum"]
+          }
+        ]
+      },
+      {
+        "wedgeLayers": [
+          { "color": "#E87D8D", "labels": ["Lorem Ipsum"] },
+          { "color": "#E87D8D", "labels": ["Lorem Ipsum"] },
+          { "color": "#E87D8D", "labels": ["Lorem Ipsum"] }
+        ]
+      },
+      {
+        "wedgeLayers": [
+          {
+            "color": "#E14159",
+            "labels": [
+              "What is the purpose of your organization and how can a vision bring that to life?"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Branch 1",
+    "color": "#007940",
+    "flipText": true,
+    "heightAdjustment": 10,
+    "onionLayers": [
+      {
+        "wedgeLayers": [
+          { "color": "#BFEDD7", "labels": ["Lorem Ipsum"] },
+          { "color": "#BFEDD7", "labels": ["Lorem Ipsum"] },
+          { "color": "#BFEDD7", "labels": ["Lorem Ipsum"] }
+        ]
+      },
+      {
+        "wedgeLayers": [
+          {
+            "color": "#94E8C1",
+            "labels": ["Lorem Ipsum"]
+          },
+          {
+            "color": "#94E8C1",
+            "labels": ["Lorem Ipsum"]
+          },
+          {
+            "color": "#94E8C1",
+            "labels": ["Lorem Ipsum"]
+          }
+        ]
+      },
+      {
+        "wedgeLayers": [
+          { "color": "#42D791", "labels": ["Lorem Ipsum"] },
+          { "color": "#42D791", "labels": ["Lorem Ipsum"] },
+          { "color": "#42D791", "labels": ["Lorem Ipsum"] }
+        ]
+      },
+      {
+        "wedgeLayers": [
+          {
+            "color": "#00AD5C",
+            "labels": [
+              "What is the purpose of your organization and how can a vision bring that to life?"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Branch 2",
+    "color": "#004288",
+    "flipText": true,
+    "heightAdjustment": 10,
+    "onionLayers": [
+      {
+        "wedgeLayers": [
+          { "color": "#B1D0F1", "labels": ["Lorem Ipsum"] },
+          { "color": "#B1D0F1", "labels": ["Lorem Ipsum"] },
+          { "color": "#B1D0F1", "labels": ["Lorem Ipsum"] }
+        ]
+      },
+      {
+        "wedgeLayers": [
+          {
+            "color": "#7FB7F4",
+            "labels": ["Lorem Ipsum"]
+          },
+          {
+            "color": "#7FB7F4",
+            "labels": ["Lorem Ipsum"]
+          },
+          {
+            "color": "#7FB7F4",
+            "labels": ["Lorem Ipsum"]
+          }
+        ]
+      },
+      {
+        "wedgeLayers": [
+          { "color": "#66B0FF", "labels": ["Lorem Ipsum"] },
+          { "color": "#66B0FF", "labels": ["Lorem Ipsum"] },
+          { "color": "#66B0FF", "labels": ["Lorem Ipsum"] }
+        ]
+      },
+      {
+        "wedgeLayers": [
+          {
+            "color": "#248EFF",
+            "labels": [
+              "What is the purpose of your organization and how can a vision bring that to life?"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

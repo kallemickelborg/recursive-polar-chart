@@ -9,287 +9,36 @@ function estimateRequiredCanvasSize(chartData, baseFontSize, minArcAngle) {
   return Math.ceil(estimatedRadius * 2); // Diameter of the circle
 }
 
-const LayeredPolarChart = () => {
+const LayeredPolarChart = ({ data, size }) => {
   const canvasRef = useRef(null);
-  const newCanvasWidth = 1250; // Adapt as needed
-  const newCanvasHeight = 1250; // Adapt as needed
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas) {
+      canvas.width = size; // Set canvas width
+      canvas.height = size; // Set canvas height
+      console.log(`Setting canvas dimensions to: ${size}x${size}`);
       const ctx = canvas.getContext("2d");
-      const centerX = newCanvasWidth / 2;
-      const centerY = newCanvasHeight / 2;
-      const maxRadius = (Math.min(newCanvasWidth, newCanvasHeight) / 2) * 0.98;
+      const centerX = size / 2;
+      const centerY = size / 2;
+      const maxRadius = (Math.min(size, size) / 2) * 0.98;
 
-      drawChart(ctx, centerX, centerY, maxRadius, chartData);
+      // Clear the canvas before redrawing
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Call the drawing function
+      drawChart(ctx, centerX, centerY, maxRadius, data);
     }
-  }, [newCanvasWidth, newCanvasHeight]); // Redraw if canvas size changes
+  }, [data, size]); // Include 'data' in the dependencies
 
   return (
-    <canvas ref={canvasRef} width={newCanvasWidth} height={newCanvasHeight} />
+    <canvas ref={canvasRef} width={size} height={size} />
   );
 };
 
-const chartData = [
-  {
-    name: "Branch 3",
-    color: "#FFD730",
-    flipText: true, // or true, depending on the community position
-    heightAdjustment: 10, // Height adjustment for the layer
-    onionLayers: [
-      {
-        wedgeLayers: [
-          { color: "#FFF2BC", labels: ["Lorem Ipsum"] },
-          { color: "#FFF2BC", labels: ["Lorem Ipsum"] },
-          { color: "#FFF2BC", labels: ["Lorem Ipsum"] },
-        ],
-      },
-      {
-        wedgeLayers: [
-          {
-            color: "#EDD575",
-            labels: [
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-            ],
-          },
-          {
-            color: "#EDD575",
-            labels: [
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-            ],
-          },
-          {
-            color: "#EDD575",
-            labels: [
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-            ],
-          },
-        ],
-      },
-      {
-        wedgeLayers: [
-          { color: "#FFE066", labels: ["Lorem Ipsum"] },
-          { color: "#FFE066", labels: ["Lorem Ipsum"] },
-          { color: "#FFE066", labels: ["Lorem Ipsum"] },
-        ],
-      },
-      {
-        wedgeLayers: [
-          {
-            color: "#FFD730",
-            labels: [
-              "What is the purpose of your organization and how can a vision bring that to life?",
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    name: "Branch 4",
-    color: "#BF2C42",
-    flipText: true, // or true, depending on the community position
-    heightAdjustment: 10, // Height adjustment for the layer
-    onionLayers: [
-      {
-        wedgeLayers: [
-          { color: "#EDC6CC", labels: ["Lorem Ipsum"] },
-          { color: "#EDC6CC", labels: ["Lorem Ipsum"] },
-          { color: "#EDC6CC", labels: ["Lorem Ipsum"] },
-        ],
-      },
-      {
-        wedgeLayers: [
-          {
-            color: "#DB8894",
-            labels: [
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-            ],
-          },
-          {
-            color: "#DB8894",
-            labels: [
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-            ],
-          },
-          {
-            color: "#DB8894",
-            labels: [
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-            ],
-          },
-        ],
-      },
-      {
-        wedgeLayers: [
-          { color: "#E87D8D", labels: ["Lorem Ipsum"] },
-          { color: "#E87D8D", labels: ["Lorem Ipsum"] },
-          { color: "#E87D8D", labels: ["Lorem Ipsum"] },
-        ],
-      },
-      {
-        wedgeLayers: [
-          {
-            color: "#E14159",
-            labels: [
-              "What is the purpose of your organization and how can a vision bring that to life?",
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    name: "Branch 1",
-    color: "#007940",
-    flipText: true, // or true, depending on the community position
-    heightAdjustment: 10, // Height adjustment for the layer
-    onionLayers: [
-      {
-        wedgeLayers: [
-          { color: "#BFEDD7", labels: ["Lorem Ipsum"] },
-          { color: "#BFEDD7", labels: ["Lorem Ipsum"] },
-          { color: "#BFEDD7", labels: ["Lorem Ipsum"] },
-        ],
-      },
-      {
-        wedgeLayers: [
-          {
-            color: "#94E8C1",
-            labels: [
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-            ],
-          },
-          {
-            color: "#94E8C1",
-            labels: [
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-            ],
-          },
-          {
-            color: "#94E8C1",
-            labels: [
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-            ],
-          },
-        ],
-      },
-      {
-        wedgeLayers: [
-          { color: "#42D791", labels: ["Lorem Ipsum"] },
-          { color: "#42D791", labels: ["Lorem Ipsum"] },
-          { color: "#42D791", labels: ["Lorem Ipsum"] },
-        ],
-      },
-      {
-        wedgeLayers: [
-          {
-            color: "#00AD5C",
-            labels: [
-              "What is the purpose of your organization and how can a vision bring that to life?",
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    name: "Branch 2",
-    color: "#004288",
-    flipText: true, // or true, depending on the community position
-    heightAdjustment: 10, // Height adjustment for the layer
-    onionLayers: [
-      {
-        wedgeLayers: [
-          {
-            color: "#B1D0F1",
-            labels: ["Lorem Ipsum"],
-          },
-          { color: "#B1D0F1", labels: ["Lorem Ipsum"] },
-          { color: "#B1D0F1", labels: ["Lorem Ipsum"] },
-        ],
-      },
-      {
-        wedgeLayers: [
-          {
-            color: "#7FB7F4",
-            labels: [
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-            ],
-          },
-          {
-            color: "#7FB7F4",
-            labels: [
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-            ],
-          },
-          {
-            color: "#7FB7F4",
-            labels: [
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-              "Lorem Ipsum",
-            ],
-          },
-        ],
-      },
-      {
-        wedgeLayers: [
-          { color: "#66B0FF", labels: ["Lorem Ipsum"] },
-          { color: "#66B0FF", labels: ["Lorem Ipsum"] },
-          { color: "#66B0FF", labels: ["Lorem Ipsum"] },
-        ],
-      },
-      {
-        wedgeLayers: [
-          {
-            color: "#248EFF",
-            labels: [
-              "What is the purpose of your organization and how can a vision bring that to life?",
-            ],
-          },
-        ],
-      },
-    ],
-  },
-];
-
+//ALL GRAPHICAL FUNCTIONS BELOW
 function drawChart(ctx, centerX, centerY, maxRadius, chartData) {
+  
   // Save the current context state (so we can restore it later)
   ctx.save();
 
@@ -300,7 +49,7 @@ function drawChart(ctx, centerX, centerY, maxRadius, chartData) {
   ctx.translate(centerX, centerY);
 
   // Rotate the canvas 45 degrees clockwise
-  ctx.rotate((-315 * Math.PI) / 180);
+  ctx.rotate(((360 / chartData.length) * (Math.PI / chartData.length)));
 
   // Move the rotation point back to the top left corner of the canvas
   ctx.translate(-centerX, -centerY);
@@ -544,20 +293,19 @@ function drawCurvedWedgeLabel(
   }
 }
 
-//WEDGE BELOW
 function drawCommunitySections(
   ctx,
   centerX,
   centerY,
   maxRadius,
-  chartData,
+  data,
   innerCircleRadius,
   bannerWidth,
 ) {
-  const totalCommunities = chartData.length;
+  const totalCommunities = data.length;
   const anglePerCommunity = (2 * Math.PI) / totalCommunities;
 
-  chartData.forEach((community, communityIndex) => {
+  data.forEach((community, communityIndex) => {
     const communityAngleStart = communityIndex * anglePerCommunity;
     const communityAngleEnd = communityAngleStart + anglePerCommunity;
     const heightAdjustment = community.heightAdjustment || 0;
@@ -567,7 +315,7 @@ function drawCommunitySections(
     community.onionLayers.forEach((layer, layerIndex) => {
       const layerHeight =
         (maxRadius - previousLayerOuterRadius) /
-          (community.onionLayers.length - layerIndex) +
+        (community.onionLayers.length - layerIndex) +
         heightAdjustment;
       const layerOuterRadius = previousLayerOuterRadius + layerHeight;
 
@@ -578,45 +326,19 @@ function drawCommunitySections(
         const wedgeEndAngle =
           wedgeStartAngle + anglePerCommunity / layer.wedgeLayers.length;
 
+        // Draw the wedge
         ctx.beginPath();
-        ctx.arc(
-          centerX,
-          centerY,
-          layerOuterRadius,
-          wedgeStartAngle,
-          wedgeEndAngle,
-          false,
-        );
-        ctx.arc(
-          centerX,
-          centerY,
-          previousLayerOuterRadius,
-          wedgeEndAngle,
-          wedgeStartAngle,
-          true,
-        );
+        ctx.arc(centerX, centerY, layerOuterRadius, wedgeStartAngle, wedgeEndAngle, false);
+        ctx.arc(centerX, centerY, previousLayerOuterRadius, wedgeEndAngle, wedgeStartAngle, true);
         ctx.closePath();
         ctx.fillStyle = wedgeLayer.color;
         ctx.fill();
 
-        // Draw vertical lines between wedges
-        if (wedgeLayerIndex < layer.wedgeLayers.length) {
-          ctx.beginPath();
-          ctx.moveTo(
-            centerX + layerOuterRadius * Math.cos(wedgeEndAngle),
-            centerY + layerOuterRadius * Math.sin(wedgeEndAngle),
-          );
-          ctx.lineTo(
-            centerX + previousLayerOuterRadius * Math.cos(wedgeEndAngle),
-            centerY + previousLayerOuterRadius * Math.sin(wedgeEndAngle),
-          );
-          ctx.strokeStyle = "white";
-          ctx.lineWidth = 4;
-          ctx.stroke();
-        }
-
         // Draw labels inside the wedge
         if (wedgeLayer.labels && wedgeLayer.labels.length > 0) {
+          // Debug: Log the labels being passed to drawWedgeLabels
+          console.log('Labels for wedge', wedgeLayerIndex, ':', wedgeLayer.labels);
+
           drawWedgeLabels(
             ctx,
             wedgeLayer.labels,
@@ -630,24 +352,6 @@ function drawCommunitySections(
           );
         }
       });
-
-      // Draw horizontal white lines after each layer
-      if (layerIndex < community.onionLayers.length - 1) {
-        ctx.beginPath();
-        ctx.arc(
-          centerX,
-          centerY,
-          layerOuterRadius,
-          communityAngleStart,
-          communityAngleEnd,
-        );
-        ctx.strokeStyle = "white";
-        ctx.lineWidth = 4;
-        ctx.shadowColor = "rgb(0, 0, 0, 1)";
-        ctx.shadowBlur = "15";
-        ctx.stroke();
-        ctx.shadowBlur = "0";
-      }
 
       // Prepare for next layer
       previousLayerOuterRadius = layerOuterRadius;
@@ -665,16 +369,6 @@ function drawCommunitySections(
     );
     ctx.stroke();
   });
-
-  // Draw the last separating line for the entire chart
-  const lastCommunityAngleEnd = totalCommunities * anglePerCommunity;
-  ctx.beginPath();
-  ctx.moveTo(centerX, centerY);
-  ctx.lineTo(
-    centerX + maxRadius * Math.cos(lastCommunityAngleEnd),
-    centerY + maxRadius * Math.sin(lastCommunityAngleEnd),
-  );
-  ctx.stroke();
 }
 
 function drawCurvedText(
