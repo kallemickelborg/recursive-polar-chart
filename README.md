@@ -1,4 +1,5 @@
 # Interactive Framework model for organizations and businesses
+
 This project introduces an interactive framework model designed to visualize and manipulate the complex interrelations within organizations and businesses. Rooted in the principles of data-driven decision-making and Simon Sinke's book "Start with Why", the model employs a polar/radio chart to represent a red-thread between different segments such as subdivisions, teams, and departments, offering a bird's-eye view of the organizational structure. The dynamic nature of this tool allows for real-time adjustments, providing stakeholders the flexibility to simulate various scenarios and their impact on the organization's ecosystem.
 
 Built with React's robust ecosystem and Vite's modern build tooling, the interactive framework model boasts a responsive and intuitive interface. This ensures that users can effortlessly engage with the model, whether for strategic planning, resource allocation, or to foster understanding across different organizational layers. The project is not just a testament to technological innovation but also to the potential of visual tools in enhancing organizational intelligence and strategy.
@@ -14,6 +15,7 @@ Built with React's robust ecosystem and Vite's modern build tooling, the interac
 Using the two in conjunction is one of the fastest ways to build a web app.
 
 ### Getting Started
+
 - Hit run
 - Edit [App.jsx](#src/App.jsx) and watch it live update!
 

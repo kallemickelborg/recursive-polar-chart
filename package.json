@@ -21,7 +21,11 @@
     "vite": "^5.0.0"
   },
   "dependencies": {
+    "autoprefixer": "^10.4.18",
     "canvas": "^2.11.2",
-    "chart.js": "^4.4.1"
+    "chart.js": "^4.4.1",
+    "flowbite": "^2.3.0",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1"
   }
 }
