@@ -1,169 +1,144 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
+import * as d3 from "d3";
+import WebFont from 'webfontloader';
+
+// Load Roboto font
+WebFont.load({
+  google: {
+    families: ['Roboto']
+  }
+});
 
 const LayeredPolarChart = ({ data, size, orgLabel }) => {
-  // Ref for the canvas
-  const canvasRef = useRef(null);
-
-  const [windowDimensions, setWindowDimensions] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight
-  });
+  const chartRef = useRef(null);
 
   useEffect(() => {
-    const handleResize = () => {
-      setWindowDimensions({
-        width: window.innerWidth,
-        height: window.innerHeight
-      });
-    };
+    // Clear the existing chart
+    d3.select("#chart").html("");
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    // Create the SVG
+    const svg = d3.select("#chart")
+      .append("svg")
+      .attr("width", size)
+      .attr("height", size)
+      .append("g")
+      .attr("transform", `translate(${size / 2}, ${size / 2})`);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      
-      const centerX = size / 2;
-      const centerY = size / 2;
-      const maxRadius = (size / 2) * 0.9;
+    // Call drawChart with all necessary parameters
+    drawChart(svg, data, size, orgLabel);
+  }, [data, size, orgLabel]);
 
-      // Now proceed with drawing since the font is available
-      drawChart(ctx, centerX, centerY, maxRadius, data, orgLabel, size);
+  const exportChart = (format) => {
+    const svgNode = document.querySelector("#chart svg");
+    if (!svgNode) return;
+
+    if (format === 'svg') {
+      const svgData = new XMLSerializer().serializeToString(svgNode);
+      const svgBlob = new Blob([svgData], {type: "image/svg+xml;charset=utf-8"});
+      const svgUrl = URL.createObjectURL(svgBlob);
+      const downloadLink = document.createElement("a");
+      downloadLink.href = svgUrl;
+      downloadLink.download = "layered_polar_chart.svg";
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    } else if (format === 'png') {
+      const canvas = document.createElement("canvas");
+      canvas.width = 2048;
+      canvas.height = 2048;
+      const ctx = canvas.getContext("2d");
+      const svgData = new XMLSerializer().serializeToString(svgNode);
+      const img = new Image();
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, 2048, 2048);
+        const pngUrl = canvas.toDataURL("image/png");
+        const downloadLink = document.createElement("a");
+        downloadLink.href = pngUrl;
+        downloadLink.download = "layered_polar_chart.png";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      };
+      img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
     }
-  }, [data, size, orgLabel]); // Re-draw when data, size, or orgLabel changes
+  };
 
-  return <canvas
-      ref={canvasRef}
-      width={size}
-      height={size}
-      style={{
-        width: '60%',
-        height: '60%',
-        maxWidth: `${size}px`,
-        maxHeight: `${size}px`
-      }}
-    />;
+  return (
+    <div>
+      <div id="chart" ref={chartRef} />
+      <div className="mt-4 flex justify-center">
+        <button onClick={() => exportChart('svg')} className="mr-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+          Export as SVG
+        </button>
+        <button onClick={() => exportChart('png')} className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+          Export as PNG
+        </button>
+      </div>
+    </div>
+  );
 };
 
-//All rendered functions are stored within the drawChart function
-function drawChart(
-  ctx,
-  centerX,
-  centerY,
-  maxRadius,
-  chartData,
-  orgLabel,
-  size,
-) {
+function drawChart(svg, data, size, orgLabel) {
+  const radius = size / 2;
+  const innerRadius = 125;
+  const bannerWidth = 75;
+  const maxRadius = radius * 0.9;
 
-  
-  // Save the current context state (so we can restore it later)
-  ctx.save();
-
-  // Clear the entire canvas
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-  // Move the rotation point to the center of the canvas
-  ctx.translate(centerX, centerY);
-
-  // Rotate the canvas 45 degrees clockwise
-  ctx.rotate((360 / chartData.length) * (Math.PI / chartData.length));
-
-  // Move the rotation point back to the top left corner of the canvas
-  ctx.translate(-centerX, -centerY);
-
-  // Draw the main sections of the chart which will be rotated
-  drawCommunityBanners(
-    ctx,
-    centerX,
-    centerY,
-    125, // innerCircleRadius
-    75, // bannerWidth
-    chartData,
-  );
-  drawTextLabels(ctx, centerX, centerY, 125, 75, chartData, size); // Example of passing 'size' to drawTextLabels
-  drawCommunitySections(
-    ctx,
-    centerX,
-    centerY,
-    maxRadius,
-    chartData,
-    125, // innerCircleRadius
-    75, // bannerWidth
-  );
-
-  // Restore the context to its original state before drawing the inner circle
-  ctx.restore();
-
-  // Draw the unrotated inner circle with label
-  drawInnerCircleWithLabel(ctx, centerX, centerY, 126, orgLabel);
+  drawInnerCircle(svg, innerRadius, orgLabel);
+  drawCommunityBanners(svg, data, radius, innerRadius, bannerWidth);
+  drawCommunitySections(svg, data, radius, innerRadius, bannerWidth, maxRadius);
 }
 
-//All the separate graphical elements (Communities/branches, onion-layers, and wedges) are stated below
-function drawInnerCircleWithLabel(ctx, centerX, centerY, radius, label) {
-  ctx.beginPath();
-  ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-  ctx.shadowBlur = "15";
-  ctx.shadowColor = "rgb(0,0,0,0.25)";
-  ctx.fillStyle = "#FF546D";
-  ctx.fill();
-  ctx.shadowBlur = "0";
+function drawInnerCircle(svg, innerRadius, orgLabel) {
+  svg
+    .append("circle")
+    .attr("r", innerRadius)
+    .attr("fill", "#FF546D")
+    .attr("filter", "url(#shadow)");
 
-  ctx.fillStyle = "white";
-  ctx.font = "42px Roboto";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(label, centerX, centerY);
+  svg
+    .append("text")
+    .attr("text-anchor", "middle")
+    .attr("dy", "0.35em")
+    .attr("fill", "white")
+    .style("font-size", "42px")
+    .style("font-family", "Roboto")
+    .text(orgLabel);
 }
 
-function drawCommunityBanners(
-  ctx,
-  centerX,
-  centerY,
-  innerRadius,
-  bannerWidth,
-  communities,
-) {
-  const anglePerCommunity = (2 * Math.PI) / communities.length;
+function drawCommunityBanners(svg, data, radius, innerRadius, bannerWidth) {
+  const anglePerCommunity = (2 * Math.PI) / data.length;
 
-  communities.forEach((community, index) => {
+  data.forEach((community, index) => {
     const startAngle = index * anglePerCommunity;
     const endAngle = startAngle + anglePerCommunity;
     const outerRadius = innerRadius + bannerWidth;
 
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, innerRadius, startAngle, endAngle, false);
-    ctx.arc(centerX, centerY, outerRadius, endAngle, startAngle, true);
-    ctx.fillStyle = community.color;
-    ctx.fill();
+    const arc = d3
+      .arc()
+      .innerRadius(innerRadius)
+      .outerRadius(outerRadius)
+      .startAngle(startAngle)
+      .endAngle(endAngle);
+
+    svg.append("path").attr("d", arc).attr("fill", community.color);
   });
 }
 
 function drawCommunitySections(
-  ctx,
-  centerX,
-  centerY,
-  maxRadius,
+  svg,
   data,
-  innerCircleRadius,
+  radius,
+  innerRadius,
   bannerWidth,
+  maxRadius
 ) {
-  const totalCommunities = data.length;
-  const anglePerCommunity = (2 * Math.PI) / totalCommunities;
-  ctx.strokeStyle = "white"; // Set the line color to white
-  ctx.lineWidth = 3; // Set the desired line width for community lines
-
   data.forEach((community, communityIndex) => {
-    const communityAngleStart = communityIndex * anglePerCommunity;
-    const communityAngleEnd = communityAngleStart + anglePerCommunity;
+    const communityAngleStart = (communityIndex * (2 * Math.PI)) / data.length;
+    const communityAngleEnd = communityAngleStart + (2 * Math.PI) / data.length;
     const heightAdjustment = community.heightAdjustment || 0;
 
-    let previousLayerOuterRadius = innerCircleRadius + bannerWidth;
-
+    let previousLayerOuterRadius = innerRadius + bannerWidth;
     community.onionLayers.forEach((layer, layerIndex) => {
       const layerHeight =
         (maxRadius - previousLayerOuterRadius) /
@@ -174,284 +149,95 @@ function drawCommunitySections(
       layer.wedgeLayers.forEach((wedgeLayer, wedgeLayerIndex) => {
         const wedgeStartAngle =
           communityAngleStart +
-          (anglePerCommunity * wedgeLayerIndex) / layer.wedgeLayers.length;
+          ((communityAngleEnd - communityAngleStart) * wedgeLayerIndex) /
+            layer.wedgeLayers.length;
         const wedgeEndAngle =
-          wedgeStartAngle + anglePerCommunity / layer.wedgeLayers.length;
+          wedgeStartAngle +
+          (communityAngleEnd - communityAngleStart) / layer.wedgeLayers.length;
 
-        // Draw the wedge
-        ctx.beginPath();
-        ctx.arc(
-          centerX,
-          centerY,
-          layerOuterRadius,
-          wedgeStartAngle,
-          wedgeEndAngle,
-          false,
-        );
-        ctx.arc(
-          centerX,
-          centerY,
-          previousLayerOuterRadius,
-          wedgeEndAngle,
-          wedgeStartAngle,
-          true,
-        );
-        ctx.shadowColor = "rgb(0,0,0,0.5)";
-        ctx.stroke();
-        ctx.strokeStyle = "white";
-        ctx.shadowBlur = "15";
-        ctx.closePath();
-        ctx.shadowColor = "rgb(0,0,0,0)";
-        ctx.fillStyle = wedgeLayer.color;
-        ctx.fill();
+        const arc = d3
+          .arc()
+          .innerRadius(previousLayerOuterRadius)
+          .outerRadius(layerOuterRadius)
+          .startAngle(wedgeStartAngle)
+          .endAngle(wedgeEndAngle);
 
-        // Inside wedgeLayers.forEach, after ctx.fill();
-        if (wedgeLayerIndex < layer.wedgeLayers.length - 1) {
-          ctx.beginPath();
-          ctx.moveTo(
-            centerX + layerOuterRadius * Math.cos(wedgeEndAngle),
-            centerY + layerOuterRadius * Math.sin(wedgeEndAngle),
-          );
-          ctx.lineTo(
-            centerX + previousLayerOuterRadius * Math.cos(wedgeEndAngle),
-            centerY + previousLayerOuterRadius * Math.sin(wedgeEndAngle),
-          );
-          ctx.strokeStyle = "white"; // Set the stroke color for the line
-          ctx.lineWidth = 3; // Set the desired line width
-          ctx.stroke();
-        }
+        svg
+          .append("path")
+          .attr("d", arc)
+          .attr("fill", wedgeLayer.color)
+          .attr("stroke", "white")
+          .attr("stroke-width", 1);
 
-        // Draw labels inside the wedge
-        if (wedgeLayer.labels && wedgeLayer.labels.length > 0) {
-          // Debug: Log the labels being passed to drawWedgeLabels
-
-          drawWedgeLabels(
-            ctx,
-            wedgeLayer.labels,
-            centerX,
-            centerY,
-            wedgeStartAngle,
-            wedgeEndAngle,
-            previousLayerOuterRadius + 10, // innerTextRadius with some margin
-            layerOuterRadius - 10, // outerTextRadius with some margin subtracted
-            community.flipText,
-          );
+        // Draw labels for each wedge layer
+        if (wedgeLayer.labels && Array.isArray(wedgeLayer.labels)) {
+          wedgeLayer.labels.forEach((label, labelIndex) => {
+            const arcLength =
+              arc.outerRadius()() * (wedgeEndAngle - wedgeStartAngle);
+            const textPathId = `arc-${communityIndex}-${layerIndex}-${wedgeLayerIndex}-${labelIndex}`;
+      
+            // Calculate the middle radius of the wedge layer
+            const middleRadius =
+              (previousLayerOuterRadius + layerOuterRadius) / 2;
+      
+            // Create a new arc for the text path
+            const textArc = d3
+              .arc()
+              .innerRadius(middleRadius)
+              .outerRadius(middleRadius)
+              .startAngle(wedgeStartAngle)
+              .endAngle(wedgeEndAngle);
+      
+            // Add hidden path for textPath reference
+            svg
+              .append("path")
+              .attr("id", textPathId)
+              .attr("d", textArc)
+              .style("visibility", "hidden");
+      
+            const text = svg
+              .append("text")
+              .attr("dy", "0.35em")
+              .append("textPath")
+              .attr("xlink:href", `#${textPathId}`)
+              .attr("startOffset", "25%")
+              .style("text-anchor", "middle")
+              .text(label);
+      
+            // Check if text fits within the wedge
+            const textLength = text.node().getComputedTextLength();
+            if (textLength > arcLength) {
+              text.text("");
+              const words = label.split(" ");
+              let line = [];
+              let lineHeight = 1.1; // em
+              let y = 0;
+              words.forEach((word, index) => {
+                line.push(word);
+                text.text(line.join(" "));
+                if (text.node().getComputedTextLength() > arcLength) {
+                  line.pop();
+                  text.text(line.join(" "));
+                  line = [word];
+                  y += lineHeight;
+                  const tspan = text
+                    .append("tspan")
+                    .attr("x", 0)
+                    .attr("dy", `${y}em`)
+                    .text(word);
+                  if (wedgeStartAngle > Math.PI) {
+                    tspan.attr("transform", "rotate(180)");
+                  }
+                }
+              });
+            }
+            });
         }
       });
 
-      // Prepare for next layer
       previousLayerOuterRadius = layerOuterRadius;
     });
-    
-    const outerRadius = maxRadius + 10; // Add a small offset to extend beyond maxRadius
-    const innerRadiusWithBanner = innerCircleRadius + bannerWidth;
-
-    ctx.beginPath();
-    ctx.moveTo(
-      centerX + outerRadius * Math.cos(communityAngleEnd),
-      centerY + outerRadius * Math.sin(communityAngleEnd)
-    );
-    ctx.lineTo(
-      centerX + innerRadiusWithBanner * Math.cos(communityAngleEnd),
-      centerY + innerRadiusWithBanner * Math.sin(communityAngleEnd)
-    );
-    ctx.stroke();
-    });
-}
-
-//All lables and text (community/branch labels and initiatives) are stated below
-function drawTextLabels(
-  ctx,
-  centerX,
-  centerY,
-  innerRadius,
-  bannerWidth,
-  communities,
-  size,
-) {
-  const scaleFactor = size / 1000; // Assuming 1000 is the base size for which your styles were originally designed
-  const fontSize = 24 * scaleFactor; // Adjust font size based on canvas size
-  ctx.font = `${fontSize}px 'Roboto', sans-serif`;
-  const labelRadius = innerRadius + bannerWidth / 2;
-  const anglePerCommunity = (2 * Math.PI) / communities.length;
-
-  communities.forEach((community, index) => {
-    const startAngle = index * anglePerCommunity;
-    const endAngle = startAngle + anglePerCommunity;
-
-    ctx.save(); // Save the current context state
-    ctx.fillStyle = "white";
-    ctx.font = "24px 'Roboto', sans-serif";
-    ctx.textBaseline = "middle";
-
-    const text = community.name;
-    let totalTextWidth = 0;
-    for (let i = 0; i < text.length; i++) {
-      totalTextWidth += ctx.measureText(text[i]).width;
-    }
-
-    // Adjust the angle based on the new text width
-    const textAngle = totalTextWidth / labelRadius;
-    let currentAngle = startAngle + (anglePerCommunity - textAngle) / 2;
-
-    for (let i = 0; i < text.length; i++) {
-      const character = text[i];
-      const charWidth = ctx.measureText(character).width;
-      // The radius for each character should be recalculated based on the current size
-      const charRadius = charWidth / (2 * Math.PI);
-      const charAngle = charWidth / labelRadius;
-
-      // Calculate the x and y position for the character
-      const x =
-        centerX +
-        (labelRadius + charRadius) * Math.cos(currentAngle + charAngle / 2);
-      const y =
-        centerY +
-        (labelRadius + charRadius) * Math.sin(currentAngle + charAngle / 2);
-
-      ctx.save(); // Save the context state before translating and rotating
-      ctx.translate(x, y);
-      ctx.rotate(currentAngle + charAngle / 2 + Math.PI / 2);
-      ctx.fillText(character, -charWidth / 2, 0); // Center the character
-      ctx.restore(); // Restore the context state
-
-      currentAngle += charAngle; // Move to the next character position
-    }
-
-    ctx.restore(); // Restore the context state
   });
-}
-
-function calculateFontSize(canvasSize) {
-  // Example logic to adjust font size based on canvas size
-  const baseSize = 14; // Base font size for a standard canvas size
-  const standardCanvasSize = 1000; // Define what you consider a standard canvas size
-  return baseSize * (canvasSize / standardCanvasSize);
-}
-
-function adjustFontSizeToFit(ctx, text, arcLength) {
-  let fontSize = 24; // Start with an initial font size
-  let textWidth;
-
-  do {
-    ctx.font = `${fontSize}px Arial`;
-    textWidth = ctx.measureText(text).width;
-    fontSize -= 1; // Decrease the font size if the text is too wide
-  } while (textWidth > arcLength && fontSize > 0);
-
-  return fontSize + 1; // Return the adjusted font size that fits the text
-}
-
-function drawWedgeLabels(
-  ctx,
-  labels,
-  centerX,
-  centerY,
-  startAngle,
-  endAngle,
-  innerRadius,
-  outerRadius,
-  flipText,
-) {
-  const baseLineHeight = 16; // Base line height which can be adjusted
-  const padding = 5; // Base padding from the edge of the wedge
-  let currentRadius = innerRadius + padding; // Start at the inner radius plus padding
-
-  ctx.fillStyle = "black"; // Ensure text color is set to black
-  ctx.textAlign = "center"; // Center align text
-  ctx.textBaseline = "middle"; // Align text in the middle vertically
-
-  labels.forEach((label) => {
-    let words = label.split(" ");
-    let lines = [];
-    let currentLine = words[0];
-
-    let arcLength =
-      ((innerRadius + outerRadius) / 2) * (endAngle - startAngle) * 1 -
-      2 * padding;
-
-    words.slice(1).forEach((word) => {
-      let testLine = currentLine + " " + word;
-      let metrics = ctx.measureText(testLine);
-      let testWidth = metrics.width;
-
-      if (testWidth > arcLength) {
-        lines.push(currentLine);
-        currentLine = word;
-      } else {
-        currentLine = testLine;
-      }
-    });
-
-    lines.push(currentLine);
-
-    if (flipText) {
-      lines = lines.reverse();
-    }
-
-    lines.forEach((line) => {
-      const lineRadius = currentRadius + baseLineHeight / 2; // Center the text vertically in the line
-      drawCurvedWedgeLabel(
-        ctx,
-        line,
-        centerX,
-        centerY,
-        lineRadius,
-        startAngle,
-        endAngle,
-      );
-
-      // Increment the radius for the next line to be drawn
-      currentRadius += baseLineHeight;
-    });
-
-    // Add extra padding after each label
-    currentRadius += padding;
-  });
-}
-
-function drawCurvedWedgeLabel(
-  ctx,
-  text,
-  centerX,
-  centerY,
-  radius,
-  startAngle,
-  endAngle,
-) {
-  const textLength = text.length;
-  const rangeAngle = endAngle - startAngle;
-
-  let fontSize = 14; // Start with the maximum font size
-  ctx.font = `${fontSize}px Roboto`; // Set the initial font
-
-  // Ensure the text is centered along the arc
-  let totalTextWidth = 0;
-  for (let i = 0; i < textLength; i++) {
-    totalTextWidth += ctx.measureText(text[i]).width;
-  }
-  const totalTextAngle = totalTextWidth / radius;
-  let currentAngle = startAngle + (rangeAngle - totalTextAngle) / 2;
-
-  // Draw each character
-  for (let i = 0; i < textLength; i++) {
-    const character = text[i];
-    const charWidth = ctx.measureText(character).width;
-    const charAngle = charWidth / radius;
-
-    // Calculate the character's position
-    const x = centerX + radius * Math.cos(currentAngle + charAngle / 2);
-    const y = centerY + radius * Math.sin(currentAngle + charAngle / 2);
-
-    // Rotate the canvas to draw the character upright
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(currentAngle + charAngle / 2 + Math.PI / 2);
-    ctx.fillText(character, 0, 0);
-    ctx.restore();
-
-    currentAngle += charAngle; // Increment the angle by the character's width
-  }
 }
 
 export default LayeredPolarChart;

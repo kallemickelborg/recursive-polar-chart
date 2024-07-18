@@ -6,7 +6,7 @@ import Drawer from "./Drawer";
 import defaultChartData from "./chartData.json"; // Assuming this is your fallback data
 
 const App = () => {
-  const [data, setData] = useState(() => {
+  const [data, setData] = useState((initialData) => {
     // Function to load initial data or default
     const savedData = localStorage.getItem("chartData");
     return savedData ? JSON.parse(savedData) : defaultChartData;
@@ -23,8 +23,13 @@ const App = () => {
   }, [data]);
 
   // Event handlers
-  const handleDataChange = (newData) => {
-    setData(newData);
+  const handleDataChange = (newData, newOrgLabel) => {
+    if (newData) {
+      setData(newData);
+    }
+    if (newOrgLabel !== undefined) {
+      setOrgLabel(newOrgLabel);
+    }
   };
 
   const handleResetClick = () => {
@@ -54,12 +59,8 @@ const App = () => {
         {isDrawerOpen ? "Close Settings" : "Open Settings"}
       </button>
       <Drawer isOpen={isDrawerOpen}>
-        <InputForm
-          data={data}
-          onDataChange={setData}
-          orgLabel={orgLabel}
-          onOrgLabelChange={setOrgLabel}
-        />
+        <InputForm data={data} onDataChange={handleDataChange} />
+
         <button className={resetButtonClass} onClick={handleResetClick}>
           Reset Template
         </button>
@@ -83,9 +84,9 @@ const App = () => {
         />
       </div>
       <div className="canvas">
-        <LayeredPolarChart
-          data={data || []}
-          size={canvasSize}
+        <LayeredPolarChart 
+          data={data} 
+          size={canvasSize} 
           orgLabel={orgLabel}
         />
       </div>

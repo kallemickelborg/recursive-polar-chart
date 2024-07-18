@@ -1,107 +1,51 @@
 import React, { useState } from "react";
 
-const InputForm = ({ data, onDataChange, orgLabel, onOrgLabelChange }) => {
-  const contentWrapperClass = "content-wrapper";
-  const drawerItemClass = "drawer-item";
-  const labelClass =
-    "w-full block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300";
-  const inputClass =
-    "bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white";
-  const inputInitiativeClass =
-    "initiative-input bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white";
-  const accordionButtonClass =
-    "flex items-center justify-between w-full p-5 font-medium text-left text-gray-500 bg-white rounded-t-lg border border-gray-200 shadow-sm hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-600";
-  const accordionDetailsClass =
-    "p-5 border border-t-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-b-lg";
-  const actionButtonClass =
-    "mt-5 w-full text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-red-700 dark:hover:bg-red-800 dark:focus:ring-red-900";
-  const removeInitiativeButtonClass =
-    "initiative-remove w-full text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-red-700 dark:hover:bg-red-800 dark:focus:ring-red-900";
-  const addLayerButtonClass =
-    "mt-5 w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-700 dark:hover:bg-blue-800 dark:focus:ring-blue-800";
-  const addWedgeButtonClass =
-    "mt-5 w-full text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-700 dark:hover:bg-green-800 dark:focus:ring-green-800";
+const InputForm = ({ data, onDataChange, orgLabel }) => {
+  const classes = {
+    contentWrapper: "content-wrapper",
+    drawerItem: "drawer-item",
+    label: "w-full block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300",
+    input: "bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white",
+    inputInitiative: "initiative-input bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white",
+    accordionButton: "flex items-center justify-between w-full p-5 font-medium text-left text-gray-500 bg-white rounded-t-lg border border-gray-200 shadow-sm hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-600",
+    accordionDetails: "p-5 border border-t-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-b-lg",
+    actionButton: "mt-5 w-full text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-red-700 dark:hover:bg-red-800 dark:focus:ring-red-900",
+    removeInitiativeButton: "initiative-remove w-full text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-red-700 dark:hover:bg-red-800 dark:focus:ring-red-900",
+    addLayerButton: "mt-5 w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-700 dark:hover:bg-blue-800 dark:focus:ring-blue-800",
+    addWedgeButton: "mt-5 w-full text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-700 dark:hover:bg-green-800 dark:focus:ring-green-800"
+  };
 
-  // State for managing accordion expansion for branches and layers
   const [expandedBranches, setExpandedBranches] = useState({});
   const [expandedLayers, setExpandedLayers] = useState({});
 
-  // Toggle expansion state for a branch
   const toggleBranchDetails = (index) => {
-    setExpandedBranches((prevState) => ({
-      ...prevState,
-      [index]: !prevState[index],
-    }));
+    setExpandedBranches((prevState) => ({ ...prevState, [index]: !prevState[index] }));
   };
 
-  // Toggle expansion state for a layer
   const toggleLayerDetails = (layerKey) => {
-    setExpandedLayers((prevState) => ({
-      ...prevState,
-      [layerKey]: !prevState[layerKey],
-    }));
+    setExpandedLayers((prevState) => ({ ...prevState, [layerKey]: !prevState[layerKey] }));
   };
 
-  // Functions to add and remove branches
   const addBranch = () => {
     const newBranch = {
       name: "New Branch",
-      color: "#999999", // Default white color for new branches
-      flipText: false, // Default value, adjust as needed
-      heightAdjustment: 10, // Default value, adjust as needed
+      color: "#999999",
+      flipText: false,
+      heightAdjustment: 10,
       onionLayers: [
         {
-          wedgeLayers: [
-            {
-              color: "#999999", // Default color for new wedges
-              labels: ["New Initiative"], // Default text for new initiatives
-            },
-            {
-              color: "#999999", // Default color for new wedges
-              labels: ["New Initiative"], // Default text for new initiatives
-            },
-            {
-              color: "#999999", // Default color for new wedges
-              labels: ["New Initiative"], // Default text for new initiatives
-            },
-          ],
+          wedgeLayers: Array(3).fill({ color: "#999999", labels: ["New Initiative"] })
+        },
+        {
+          wedgeLayers: Array(3).fill({ color: "#999999", labels: ["New Initiative"] })
+        },
+        {
+          wedgeLayers: Array(3).fill({ color: "#999999", labels: ["New Initiative"] })
         },
         {
           wedgeLayers: [
             {
-              color: "#999999", // Default color for new wedges
-              labels: ["New Initiative"], // Default text for new initiatives
-            },
-            {
-              color: "#999999", // Default color for new wedges
-              labels: ["New Initiative"], // Default text for new initiatives
-            },
-            {
-              color: "#999999", // Default color for new wedges
-              labels: ["New Initiative"], // Default text for new initiatives
-            },
-          ],
-        },
-        {
-          wedgeLayers: [
-            {
-              color: "#999999", // Default color for new wedges
-              labels: ["New Initiative"], // Default text for new initiatives
-            },
-            {
-              color: "#999999", // Default color for new wedges
-              labels: ["New Initiative"], // Default text for new initiatives
-            },
-            {
-              color: "#999999", // Default color for new wedges
-              labels: ["New Initiative"], // Default text for new initiatives
-            },
-          ],
-        },
-        {
-          wedgeLayers: [
-            {
-              color: "#999999", // Default color for new wedges
+              color: "#999999",
               labels: [
                 "What is the purpose of your organization and how can a vision bring that to life?",
               ],
@@ -112,23 +56,19 @@ const InputForm = ({ data, onDataChange, orgLabel, onOrgLabelChange }) => {
     };
     const updatedData = [...data, newBranch];
     onDataChange(updatedData);
-    // Update local storage
     localStorage.setItem("chartData", JSON.stringify(updatedData));
   };
+
   const removeBranch = (branchIndex) => {
-    const isConfirmed = window.confirm(
-      "Are you sure you want to delete this branch?",
-    );
+    const isConfirmed = window.confirm("Are you sure you want to delete this branch?");
     if (isConfirmed) {
       const newData = [...data];
       newData.splice(branchIndex, 1);
       onDataChange(newData);
-      // Update local storage if you're using it
       localStorage.setItem("chartData", JSON.stringify(newData));
     }
   };
 
-  // Function to update branch details
   const handleBranchChange = (branchIndex, key, value) => {
     const newData = [...data];
     newData[branchIndex] = { ...newData[branchIndex], [key]: value };
@@ -136,31 +76,25 @@ const InputForm = ({ data, onDataChange, orgLabel, onOrgLabelChange }) => {
     localStorage.setItem("chartData", JSON.stringify(newData));
   };
 
-  // Functions to add and remove onion layers
   const addOnionLayer = (branchIndex) => {
     const newData = [...data];
-    const newOnionLayer = {
-      wedgeLayers: [{ color: "#FFFFFF", labels: ["New Initiative"] }],
-    };
+    const newOnionLayer = { wedgeLayers: [{ color: "#FFFFFF", labels: ["New Initiative"] }] };
     newData[branchIndex].onionLayers = newData[branchIndex].onionLayers || [];
     newData[branchIndex].onionLayers.push(newOnionLayer);
     onDataChange(newData);
     localStorage.setItem("chartData", JSON.stringify(newData));
   };
+
   const removeOnionLayer = (branchIndex, layerIndex) => {
-    const isConfirmed = window.confirm(
-      "Are you sure you want to delete this onion layer?",
-    );
+    const isConfirmed = window.confirm("Are you sure you want to delete this onion layer?");
     if (isConfirmed) {
       const newData = [...data];
       newData[branchIndex].onionLayers.splice(layerIndex, 1);
       onDataChange(newData);
-      // Update local storage if you're using it
       localStorage.setItem("chartData", JSON.stringify(newData));
     }
   };
 
-  // Functions to add and remove wedges
   const addWedgeLayer = (branchIndex, layerIndex) => {
     const newData = [...data];
     const newWedge = { color: "#DDDDDD", labels: ["New Label"] };
@@ -168,100 +102,70 @@ const InputForm = ({ data, onDataChange, orgLabel, onOrgLabelChange }) => {
     onDataChange(newData);
     localStorage.setItem("chartData", JSON.stringify(newData));
   };
+
   const removeWedgeLayer = (branchIndex, layerIndex, wedgeIndex) => {
-    const isConfirmed = window.confirm(
-      "Are you sure you want to delete this wedge layer?",
-    );
+    const isConfirmed = window.confirm("Are you sure you want to delete this wedge layer?");
     if (isConfirmed) {
       const newData = [...data];
-      newData[branchIndex].onionLayers[layerIndex].wedgeLayers.splice(
-        wedgeIndex,
-        1,
-      );
+      newData[branchIndex].onionLayers[layerIndex].wedgeLayers.splice(wedgeIndex, 1);
       onDataChange(newData);
       localStorage.setItem("chartData", JSON.stringify(newData));
     }
   };
 
-  // Function to update the wedges colors in realtime and store it locally
-  const handleWedgeChange = (
-    branchIndex,
-    layerIndex,
-    wedgeIndex,
-    key,
-    value,
-  ) => {
+  const handleWedgeChange = (branchIndex, layerIndex, wedgeIndex, key, value) => {
     const newData = [...data];
-    newData[branchIndex].onionLayers[layerIndex].wedgeLayers[wedgeIndex][key] =
-      value;
+    newData[branchIndex].onionLayers[layerIndex].wedgeLayers[wedgeIndex][key] = value;
     onDataChange(newData);
     localStorage.setItem("chartData", JSON.stringify(newData));
   };
 
-  // Functions to add and remove initiatives
   const addInitiative = (branchIndex, layerIndex, wedgeIndex) => {
     const newData = [...data];
-    newData[branchIndex].onionLayers[layerIndex].wedgeLayers[
-      wedgeIndex
-    ].labels.push("New Initiative");
+    newData[branchIndex].onionLayers[layerIndex].wedgeLayers[wedgeIndex].labels.push("New Initiative");
     onDataChange(newData);
     localStorage.setItem("chartData", JSON.stringify(newData));
   };
-  const removeInitiative = (
-    branchIndex,
-    layerIndex,
-    wedgeIndex,
-    initiativeIndex,
-  ) => {
-    const isConfirmed = window.confirm(
-      "Are you sure you want to delete this initiative?",
-    );
+
+  const removeInitiative = (branchIndex, layerIndex, wedgeIndex, initiativeIndex) => {
+    const isConfirmed = window.confirm("Are you sure you want to delete this initiative?");
     if (isConfirmed) {
       const newData = [...data];
-      newData[branchIndex].onionLayers[layerIndex].wedgeLayers[
-        wedgeIndex
-      ].labels.splice(initiativeIndex, 1);
+      newData[branchIndex].onionLayers[layerIndex].wedgeLayers[wedgeIndex].labels.splice(initiativeIndex, 1);
       onDataChange(newData);
       localStorage.setItem("chartData", JSON.stringify(newData));
     }
   };
 
-  // Function to update the initiatives in realtime and store it locally
-  const handleInitiativeChange = (
-    branchIndex,
-    layerIndex,
-    wedgeIndex,
-    initiativeIndex,
-    value,
-  ) => {
+  const handleInitiativeChange = (branchIndex, layerIndex, wedgeIndex, initiativeIndex, value) => {
     const newData = [...data];
-    newData[branchIndex].onionLayers[layerIndex].wedgeLayers[wedgeIndex].labels[
-      initiativeIndex
-    ] = value;
+    newData[branchIndex].onionLayers[layerIndex].wedgeLayers[wedgeIndex].labels[initiativeIndex] = value;
     onDataChange(newData);
     localStorage.setItem("chartData", JSON.stringify(newData));
+  };
+
+  const handleOrgLabelChange = (newLabel) => {
+    onDataChange(null, newLabel);
   };
 
   return (
-    <div className="content-wrapper">
-      {/* Input field for adjusting the "ORG" label */}
-      <div className="drawer-item">
-        <label className={labelClass}>Organization Label:</label>
+    <div className={classes.contentWrapper}>
+      <div className={classes.drawerItem}>
+        <label className={classes.label}>Organization Label:</label>
         <input
-          className={inputClass}
+          className={classes.input}
           type="text"
           value={orgLabel}
-          onChange={(e) => onOrgLabelChange(e.target.value)}
+          onChange={(e) => handleOrgLabelChange(e.target.value)}
         />
       </div>
 
       {data.map((branch, branchIndex) => (
-        <div key={`branch-${branchIndex}`} className="drawer-item">
-          {/* Branch Accordion Header */}
+        <div key={`branch-${branchIndex}`} className={classes.drawerItem}>
           <h2 className="font-semibold text-lg">
             <button
               type="button"
-              className={accordionButtonClass}
+              className={classes.accordionButton}
               aria-expanded="false"
               onClick={() => toggleBranchDetails(branchIndex)}
             >
@@ -286,31 +190,25 @@ const InputForm = ({ data, onDataChange, orgLabel, onOrgLabelChange }) => {
             </button>
           </h2>
 
-          {/* Branch Accordion Body */}
           {expandedBranches[branchIndex] && (
-            <div className={accordionDetailsClass}>
-              {/* Branch Details */}
+            <div className={classes.accordionDetails}>
               <div className="mb-4">
-                <label className={labelClass}>Branch Name:</label>
+                <label className={classes.label}>Branch Name:</label>
                 <input
-                  className={inputClass}
+                  className={classes.input}
                   type="text"
                   value={branch.name}
-                  onChange={(e) =>
-                    handleBranchChange(branchIndex, "name", e.target.value)
-                  }
+                  onChange={(e) => handleBranchChange(branchIndex, "name", e.target.value)}
                 />
               </div>
 
               <div className="mb-4">
-                <label className={labelClass}>Branch Color:</label>
+                <label className={classes.label}>Branch Color:</label>
                 <input
                   className="w-20 h-10 p-0 border-0 rounded-lg cursor-pointer"
                   type="color"
                   value={branch.color}
-                  onChange={(e) =>
-                    handleBranchChange(branchIndex, "color", e.target.value)
-                  }
+                  onChange={(e) => handleBranchChange(branchIndex, "color", e.target.value)}
                 />
               </div>
 
@@ -319,19 +217,18 @@ const InputForm = ({ data, onDataChange, orgLabel, onOrgLabelChange }) => {
                   confirm("Are you sure you want to delete this branch?") &&
                   removeBranch(branchIndex)
                 }
-                className={actionButtonClass}
+                className={classes.actionButton}
               >
                 Remove Branch
               </button>
 
-              {/* Onion Layers Mapping */}
               {branch.onionLayers.map((layer, layerIndex) => {
                 const layerKey = `branch-${branchIndex}-layer-${layerIndex}`;
                 return (
                   <div key={layerKey} className="mt-4">
                     <button
                       onClick={() => toggleLayerDetails(layerKey)}
-                      className={accordionButtonClass}
+                      className={classes.accordionButton}
                     >
                       Onion Layer {layerIndex + 1}
                       <svg
@@ -374,7 +271,7 @@ const InputForm = ({ data, onDataChange, orgLabel, onOrgLabelChange }) => {
                                     layerIndex,
                                     wedgeIndex,
                                     "color",
-                                    e.target.value,
+                                    e.target.value
                                   )
                                 }
                               />
@@ -389,7 +286,7 @@ const InputForm = ({ data, onDataChange, orgLabel, onOrgLabelChange }) => {
                                 </label>
                                 <input
                                   type="text"
-                                  className={inputInitiativeClass}
+                                  className={classes.inputInitiative}
                                   value={label}
                                   onChange={(e) =>
                                     handleInitiativeChange(
@@ -397,23 +294,23 @@ const InputForm = ({ data, onDataChange, orgLabel, onOrgLabelChange }) => {
                                       layerIndex,
                                       wedgeIndex,
                                       labelIndex,
-                                      e.target.value,
+                                      e.target.value
                                     )
                                   }
                                 />
                                 <button
                                   onClick={() =>
                                     confirm(
-                                      "Are you sure you want to delete this initiative?",
+                                      "Are you sure you want to delete this initiative?"
                                     ) &&
                                     removeInitiative(
                                       branchIndex,
                                       layerIndex,
                                       wedgeIndex,
-                                      labelIndex,
+                                      labelIndex
                                     )
                                   }
-                                  className={removeInitiativeButtonClass}
+                                  className={classes.removeInitiativeButton}
                                 >
                                   Remove Initiative
                                 </button>
@@ -424,10 +321,10 @@ const InputForm = ({ data, onDataChange, orgLabel, onOrgLabelChange }) => {
                                 addInitiative(
                                   branchIndex,
                                   layerIndex,
-                                  wedgeIndex,
+                                  wedgeIndex
                                 )
                               }
-                              className={addLayerButtonClass}
+                              className={classes.addLayerButton}
                             >
                               Add Initiative
                             </button>
@@ -437,10 +334,10 @@ const InputForm = ({ data, onDataChange, orgLabel, onOrgLabelChange }) => {
                                 removeWedgeLayer(
                                   branchIndex,
                                   layerIndex,
-                                  wedgeIndex,
+                                  wedgeIndex
                                 )
                               }
-                              className={actionButtonClass}
+                              className={classes.actionButton}
                             >
                               Remove Wedge
                             </button>
@@ -451,14 +348,14 @@ const InputForm = ({ data, onDataChange, orgLabel, onOrgLabelChange }) => {
 
                         <button
                           onClick={() => addWedgeLayer(branchIndex, layerIndex)}
-                          className={addWedgeButtonClass}
+                          className={classes.addWedgeButton}
                         >
                           Add Wedge
                         </button>
 
                         <button
                           onClick={() => addOnionLayer(branchIndex)}
-                          className={addWedgeButtonClass}
+                          className={classes.addWedgeButton}
                         >
                           Add Onion Layer
                         </button>
@@ -466,10 +363,10 @@ const InputForm = ({ data, onDataChange, orgLabel, onOrgLabelChange }) => {
                         <button
                           onClick={() =>
                             confirm(
-                              "Are you sure you want to delete this onion layer?",
+                              "Are you sure you want to delete this onion layer?"
                             ) && removeOnionLayer(branchIndex, layerIndex)
                           }
-                          className={actionButtonClass}
+                          className={classes.actionButton}
                         >
                           Remove Onion Layer
                         </button>
@@ -483,7 +380,7 @@ const InputForm = ({ data, onDataChange, orgLabel, onOrgLabelChange }) => {
         </div>
       ))}
       <div className="mt-4">
-        <button onClick={addBranch} className={addWedgeButtonClass}>
+        <button onClick={addBranch} className={classes.addWedgeButton}>
           Add Branch
         </button>
       </div>
