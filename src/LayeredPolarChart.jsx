@@ -9,7 +9,18 @@ WebFont.load({
   }
 });
 
-const LayeredPolarChart = ({ data, size, orgLabel }) => {
+const LayeredPolarChart = ({ 
+  data, 
+  size, 
+  orgLabel, 
+  fontSize, 
+  innerRadius, 
+  bannerWidth, 
+  maxRadiusRatio, 
+  innerCircleColor, 
+  orgLabelFontSize,
+  bannerFontSize
+}) => {
   const chartRef = useRef(null);
 
   useEffect(() => {
@@ -25,8 +36,8 @@ const LayeredPolarChart = ({ data, size, orgLabel }) => {
       .attr("transform", `translate(${size / 2}, ${size / 2})`);
 
     // Call drawChart with all necessary parameters
-    drawChart(svg, data, size, orgLabel);
-  }, [data, size, orgLabel]);
+    drawChart(svg, data, size, orgLabel, fontSize, innerRadius, bannerWidth, maxRadiusRatio, innerCircleColor, orgLabelFontSize, bannerFontSize);
+  }, [data, size, orgLabel, fontSize, innerRadius, bannerWidth, maxRadiusRatio, innerCircleColor, orgLabelFontSize, bannerFontSize]);
 
   const exportChart = (format) => {
     const svgNode = document.querySelector("#chart svg");
@@ -78,22 +89,20 @@ const LayeredPolarChart = ({ data, size, orgLabel }) => {
   );
 };
 
-function drawChart(svg, data, size, orgLabel) {
+function drawChart(svg, data, size, orgLabel, fontSize, innerRadius, bannerWidth, maxRadiusRatio, innerCircleColor, orgLabelFontSize, bannerFontSize) {
   const radius = size / 2;
-  const innerRadius = 125;
-  const bannerWidth = 75;
-  const maxRadius = radius * 0.9;
+  const maxRadius = radius * maxRadiusRatio;
 
-  drawInnerCircle(svg, innerRadius, orgLabel);
-  drawCommunityBanners(svg, data, radius, innerRadius, bannerWidth);
-  drawCommunitySections(svg, data, radius, innerRadius, bannerWidth, maxRadius);
+  drawInnerCircle(svg, innerRadius, orgLabel, innerCircleColor, orgLabelFontSize);
+  drawCommunityBanners(svg, data, radius, innerRadius, bannerWidth, bannerFontSize); // Use bannerFontSize here
+  drawCommunitySections(svg, data, radius, innerRadius, bannerWidth, maxRadius, fontSize);
 }
 
-function drawInnerCircle(svg, innerRadius, orgLabel) {
+function drawInnerCircle(svg, innerRadius, orgLabel, innerCircleColor, orgLabelFontSize) {
   svg
     .append("circle")
     .attr("r", innerRadius)
-    .attr("fill", "#FF546D")
+    .attr("fill", innerCircleColor)
     .attr("filter", "url(#shadow)");
 
   svg
@@ -101,12 +110,12 @@ function drawInnerCircle(svg, innerRadius, orgLabel) {
     .attr("text-anchor", "middle")
     .attr("dy", "0.35em")
     .attr("fill", "white")
-    .style("font-size", "42px")
+    .style("font-size", `${orgLabelFontSize}px`)
     .style("font-family", "Roboto")
     .text(orgLabel);
 }
 
-function drawCommunityBanners(svg, data, radius, innerRadius, bannerWidth) {
+function drawCommunityBanners(svg, data, radius, innerRadius, bannerWidth, bannerFontSize) {
   const anglePerCommunity = (2 * Math.PI) / data.length;
 
   data.forEach((community, index) => {
@@ -122,17 +131,43 @@ function drawCommunityBanners(svg, data, radius, innerRadius, bannerWidth) {
       .endAngle(endAngle);
 
     svg.append("path").attr("d", arc).attr("fill", community.color);
+
+    // Add curved text for the community name
+    const textPathId = `community-banner-${index}`;
+    const middleRadius = innerRadius + bannerWidth / 2;
+
+    const textArc = d3
+      .arc()
+      .innerRadius(middleRadius)
+      .outerRadius(middleRadius)
+      .startAngle(startAngle)
+      .endAngle(endAngle);
+
+    svg
+      .append("path")
+      .attr("id", textPathId)
+      .attr("d", textArc)
+      .style("visibility", "hidden");
+
+      const text = svg
+      .append("text")
+      .append("textPath")
+      .attr("xlink:href", `#${textPathId}`)
+      .attr("startOffset", "25%")
+      .style("text-anchor", "middle")
+      .style("font-size", `${bannerFontSize}px`)
+      .style("fill", community.flipText ? "black" : "white")
+      .text(community.name);
+
+    // Adjust text position if it needs to be flipped
+    if (community.flipText) {
+      text.attr("transform", `translate(0, ${bannerWidth}) rotate(180)`);
+    }
   });
 }
 
-function drawCommunitySections(
-  svg,
-  data,
-  radius,
-  innerRadius,
-  bannerWidth,
-  maxRadius
-) {
+function drawCommunitySections(svg, data, radius, innerRadius, bannerWidth, maxRadius, fontSize) {
+
   data.forEach((community, communityIndex) => {
     const communityAngleStart = (communityIndex * (2 * Math.PI)) / data.length;
     const communityAngleEnd = communityAngleStart + (2 * Math.PI) / data.length;
@@ -171,67 +206,65 @@ function drawCommunitySections(
 
         // Draw labels for each wedge layer
         if (wedgeLayer.labels && Array.isArray(wedgeLayer.labels)) {
+          const labelSpacing = 1.2; // em
           wedgeLayer.labels.forEach((label, labelIndex) => {
-            const arcLength =
-              arc.outerRadius()() * (wedgeEndAngle - wedgeStartAngle);
+            const arcLength = arc.outerRadius()() * (wedgeEndAngle - wedgeStartAngle);
             const textPathId = `arc-${communityIndex}-${layerIndex}-${wedgeLayerIndex}-${labelIndex}`;
-      
-            // Calculate the middle radius of the wedge layer
-            const middleRadius =
-              (previousLayerOuterRadius + layerOuterRadius) / 2;
-      
-            // Create a new arc for the text path
+        
+            const middleRadius = (previousLayerOuterRadius + layerOuterRadius) / 2;
+        
             const textArc = d3
               .arc()
               .innerRadius(middleRadius)
               .outerRadius(middleRadius)
               .startAngle(wedgeStartAngle)
               .endAngle(wedgeEndAngle);
-      
-            // Add hidden path for textPath reference
+        
             svg
               .append("path")
               .attr("id", textPathId)
               .attr("d", textArc)
               .style("visibility", "hidden");
-      
-            const text = svg
+        
+              const text = svg
               .append("text")
-              .attr("dy", "0.35em")
+              .attr("dy", `${labelIndex * labelSpacing}em`)
               .append("textPath")
               .attr("xlink:href", `#${textPathId}`)
               .attr("startOffset", "25%")
               .style("text-anchor", "middle")
+              .style("font-size", `${fontSize}px`)
               .text(label);
-      
-            // Check if text fits within the wedge
+        
             const textLength = text.node().getComputedTextLength();
             if (textLength > arcLength) {
               text.text("");
               const words = label.split(" ");
               let line = [];
-              let lineHeight = 1.1; // em
-              let y = 0;
-              words.forEach((word, index) => {
+              let tspan = text.text("");
+        
+              words.forEach((word) => {
                 line.push(word);
-                text.text(line.join(" "));
-                if (text.node().getComputedTextLength() > arcLength) {
+                tspan.text(line.join(" "));
+                if (tspan.node().getComputedTextLength() > arcLength) {
                   line.pop();
-                  text.text(line.join(" "));
+                  tspan.text(line.join(" "));
                   line = [word];
-                  y += lineHeight;
-                  const tspan = text
+                  tspan = text
                     .append("tspan")
-                    .attr("x", 0)
-                    .attr("dy", `${y}em`)
+                    .attr("dy", "1.2em")
+                    .attr("startOffset", "25%")
                     .text(word);
-                  if (wedgeStartAngle > Math.PI) {
-                    tspan.attr("transform", "rotate(180)");
-                  }
                 }
               });
+              
+              // Center the text labels collectively
+              const textLines = text.selectAll("tspan");
+              const textHeight = textLines.size() * 1.2; // Assuming 1.2em line spacing
+              const textCenterY = (textHeight / 2) - 0.6; // Adjust for half the text height and half the line spacing
+              textLines.attr("dy", (_, i) => `${i * 1.2 - textCenterY}em`);
             }
-            });
+          });
         }
       });
 
