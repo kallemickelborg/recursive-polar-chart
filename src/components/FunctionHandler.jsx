@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 
 // Data
 import defaultChartConfig from "../chartData.json";
-import * as XLSX from 'xlsx';
+import * as XLSX from "xlsx";
 
 const useChartData = () => {
   const [data, setData] = useState(() => {
@@ -13,7 +13,9 @@ const useChartData = () => {
 
   const [settings, setSettings] = useState(() => {
     const savedSettings = localStorage.getItem("chartSettings");
-    return savedSettings ? JSON.parse(savedSettings) : defaultChartConfig.settings;
+    return savedSettings
+      ? JSON.parse(savedSettings)
+      : defaultChartConfig.settings;
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -37,8 +39,8 @@ const useChartData = () => {
         reader.readAsBinaryString(file);
       });
 
-      const wb = XLSX.read(result, { type: 'binary' });
-      
+      const wb = XLSX.read(result, { type: "binary" });
+
       const settingsSheet = wb.Sheets["Settings"];
       const branchesSheet = wb.Sheets["Branches"];
 
@@ -51,15 +53,15 @@ const useChartData = () => {
 
       // Reconstruct the branches structure
       const newBranches = [];
-      branchesData.forEach(row => {
-        let branch = newBranches.find(b => b.name === row.BranchName);
+      branchesData.forEach((row) => {
+        let branch = newBranches.find((b) => b.name === row.BranchName);
         if (!branch) {
           branch = {
             name: row.BranchName,
             color: row.BranchColor,
             flipText: row.BranchFlipText,
             heightAdjustment: row.BranchHeightAdjustment,
-            onionLayers: []
+            onionLayers: [],
           };
           newBranches.push(branch);
         }
@@ -72,7 +74,7 @@ const useChartData = () => {
 
         let wedge = layer.wedgeLayers[row.WedgeLayerIndex];
         if (!wedge) {
-          wedge = { color: row.WedgeColor, labels: [] };
+          wedge = { labels: [] };
           layer.wedgeLayers[row.WedgeLayerIndex] = wedge;
         }
 
@@ -86,7 +88,6 @@ const useChartData = () => {
 
       localStorage.setItem("chartSettings", JSON.stringify(newSettings));
       localStorage.setItem("chartData", JSON.stringify(newBranches));
-
     } catch (error) {
       setError("Error importing Excel file: " + error.message);
     } finally {
@@ -100,24 +101,21 @@ const useChartData = () => {
 
   const resetToDefaults = () => {
     setData([...defaultChartConfig.branches]);
-    setSettings({...defaultChartConfig.settings});
+    setSettings({ ...defaultChartConfig.settings });
     localStorage.clear();
   };
 
   const addBranch = () => {
     const newBranch = {
       name: "New Branch",
-      color: "#999",
+      color: "#333333",
       flipText: false,
       heightAdjustment: 10,
-      onionLayers: [
-        {
-          wedgeLayers: Array(3).fill({
-            color: "#999",
-            labels: ["New Label"],
-          }),
-        },
-      ],
+      onionLayers: Array(3).fill({
+        wedgeLayers: Array(2).fill({
+          labels: ["Label"],
+        }),
+      }),
     };
     setData((prevData) => [...prevData, newBranch]);
   };
@@ -143,9 +141,7 @@ const useChartData = () => {
               onionLayers: [
                 ...branch.onionLayers,
                 {
-                  wedgeLayers: [
-                    { color: "#999", labels: ["New Label"] },
-                  ],
+                  wedgeLayers: [{ labels: ["New Label"] }],
                 },
               ],
             }
@@ -181,7 +177,7 @@ const useChartData = () => {
                       ...layer,
                       wedgeLayers: [
                         ...layer.wedgeLayers,
-                        { color: "#999", labels: ["New Label"] },
+                        { labels: ["New Label"] },
                       ],
                     }
                   : layer
@@ -214,37 +210,7 @@ const useChartData = () => {
     );
   };
 
-  const handleWedgeChange = (
-    branchIndex,
-    layerIndex,
-    wedgeIndex,
-    key,
-    value
-  ) => {
-    setData((prevData) =>
-      prevData.map((branch, index) =>
-        index === branchIndex
-          ? {
-              ...branch,
-              onionLayers: branch.onionLayers.map((layer, lIndex) =>
-                lIndex === layerIndex
-                  ? {
-                      ...layer,
-                      wedgeLayers: layer.wedgeLayers.map((wedge, wIndex) =>
-                        wIndex === wedgeIndex
-                          ? { ...wedge, [key]: value }
-                          : wedge
-                      ),
-                    }
-                  : layer
-              ),
-            }
-          : branch
-      )
-    );
-  };
-
-  const addInitiative = (branchIndex, layerIndex, wedgeIndex) => {
+  const addLabel = (branchIndex, layerIndex, wedgeIndex) => {
     setData((prevData) =>
       prevData.map((branch, index) =>
         index === branchIndex
@@ -271,12 +237,7 @@ const useChartData = () => {
     );
   };
 
-  const removeInitiative = (
-    branchIndex,
-    layerIndex,
-    wedgeIndex,
-    initiativeIndex
-  ) => {
+  const removeLabel = (branchIndex, layerIndex, wedgeIndex, labelIndex) => {
     setData((prevData) =>
       prevData.map((branch, index) =>
         index === branchIndex
@@ -291,7 +252,7 @@ const useChartData = () => {
                           ? {
                               ...wedge,
                               labels: wedge.labels.filter(
-                                (_, iIndex) => iIndex !== initiativeIndex
+                                (_, iIndex) => iIndex !== labelIndex
                               ),
                             }
                           : wedge
@@ -305,11 +266,11 @@ const useChartData = () => {
     );
   };
 
-  const handleInitiativeChange = (
+  const handleLabelChange = (
     branchIndex,
     layerIndex,
     wedgeIndex,
-    initiativeIndex,
+    labelIndex,
     value
   ) => {
     setData((prevData) =>
@@ -326,7 +287,7 @@ const useChartData = () => {
                           ? {
                               ...wedge,
                               labels: wedge.labels.map((label, iIndex) =>
-                                iIndex === initiativeIndex ? value : label
+                                iIndex === labelIndex ? value : label
                               ),
                             }
                           : wedge
@@ -342,13 +303,13 @@ const useChartData = () => {
 
   const exportToExcel = () => {
     const wb = XLSX.utils.book_new();
-    
+
     // Convert settings to worksheet
     const settingsWS = XLSX.utils.json_to_sheet([settings]);
     XLSX.utils.book_append_sheet(wb, settingsWS, "Settings");
 
     // Prepare branches data for Excel
-    const branchesData = data.flatMap((branch, branchIndex) => 
+    const branchesData = data.flatMap((branch, branchIndex) =>
       branch.onionLayers.flatMap((layer, layerIndex) =>
         layer.wedgeLayers.flatMap((wedge, wedgeIndex) =>
           wedge.labels.map((label, labelIndex) => ({
@@ -358,9 +319,8 @@ const useChartData = () => {
             BranchHeightAdjustment: branch.heightAdjustment,
             OnionLayerIndex: layerIndex,
             WedgeLayerIndex: wedgeIndex,
-            WedgeColor: wedge.color,
             LabelIndex: labelIndex,
-            Label: label
+            Label: label,
           }))
         )
       )
@@ -374,6 +334,21 @@ const useChartData = () => {
     XLSX.writeFile(wb, "chart_data.xlsx");
   };
 
+  const calculateLayerColor = (baseColor, layerIndex, totalLayers) => {
+    const opacity = (layerIndex + 1) / totalLayers;
+    const rgb = hexToRgb(baseColor);
+    return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
+  };
+
+  const hexToRgb = (hex) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : null;
+  };
+
   return {
     data,
     settings,
@@ -385,16 +360,16 @@ const useChartData = () => {
     removeOnionLayer,
     addWedgeLayer,
     removeWedgeLayer,
-    handleWedgeChange,
-    addInitiative,
-    removeInitiative,
-    handleInitiativeChange,
+    addLabel,
+    removeLabel,
+    handleLabelChange,
     resetToDefaults,
     exportToExcel,
     importFromExcel,
     isLoading,
     error,
     dataVersion: dataVersion.current,
+    calculateLayerColor,
   };
 };
 

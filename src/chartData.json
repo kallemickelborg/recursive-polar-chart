@@ -1,7 +1,7 @@
 {
   "settings": {
     "orgLabel": "COMPANY",
-    "innerCircleColor": "#333",
+    "innerCircleColor": "#999",
     "orgLabelFontSize": 30,
     "fontSize": 12,
     "innerRadius": 100,
@@ -13,26 +13,25 @@
   "branches": [
     {
       "name": "Branch 1",
-      "color": "#BF2C42",
+      "color": "#FF220F",
       "flipText": true,
       "heightAdjustment": 10,
       "onionLayers": [
         {
           "wedgeLayers": [
-            { "color": "#EDC6CC", "labels": ["Label"] },
-            { "color": "#EDC6CC", "labels": ["Label"] }
+            { "labels": ["Label"] },
+            { "labels": ["Label"] }
           ]
         },
         {
           "wedgeLayers": [
-            { "color": "#E87D8D", "labels": ["Label"] },
-            { "color": "#E87D8D", "labels": ["Label"] }
+            { "labels": ["Label"] },
+            { "labels": ["Label"] }
           ]
         },
         {
           "wedgeLayers": [
             {
-              "color": "#E14159",
               "labels": [
                 "What is the purpose of your organization and how can a vision bring that to life?"
               ]
@@ -43,26 +42,25 @@
     },
     {
       "name": "Branch 2",
-      "color": "#007940",
+      "color": "#82E600",
       "flipText": true,
       "heightAdjustment": 10,
       "onionLayers": [
         {
           "wedgeLayers": [
-            { "color": "#BFEDD7", "labels": ["Label"] },
-            { "color": "#BFEDD7", "labels": ["Label"] }
+            { "labels": ["Label"] },
+            { "labels": ["Label"] }
           ]
         },
         {
           "wedgeLayers": [
-            { "color": "#42D791", "labels": ["Label"] },
-            { "color": "#42D791", "labels": ["Label"] }
+            { "labels": ["Label"] },
+            { "labels": ["Label"] }
           ]
         },
         {
           "wedgeLayers": [
             {
-              "color": "#00AD5C",
               "labels": [
                 "What is the purpose of your organization and how can a vision bring that to life?"
               ]
@@ -73,26 +71,25 @@
     },
     {
       "name": "Branch 3",
-      "color": "#004288",
+      "color": "#1736F5",
       "flipText": true,
       "heightAdjustment": 10,
       "onionLayers": [
         {
           "wedgeLayers": [
-            { "color": "#B1D0F1", "labels": ["Label"] },
-            { "color": "#B1D0F1", "labels": ["Label"] }
+            { "labels": ["Label"] },
+            { "labels": ["Label"] }
           ]
         },
         {
           "wedgeLayers": [
-            { "color": "#66B0FF", "labels": ["Label"] },
-            { "color": "#66B0FF", "labels": ["Label"] }
+            { "labels": ["Label"] },
+            { "labels": ["Label"] }
           ]
         },
         {
           "wedgeLayers": [
             {
-              "color": "#248EFF",
               "labels": [
                 "What is the purpose of your organization and how can a vision bring that to life?"
               ]

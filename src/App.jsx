@@ -9,8 +9,8 @@ import Drawer from "./components/Drawer";
 import useChartData from "./components/FunctionHandler";
 
 // Styles
-import '@/styles/App.css';
-import { BUTTON_CLASSES } from '@/styles/classes';
+import "@/styles/App.css";
+import { BUTTON_CLASSES } from "@/styles/classes";
 
 const App = () => {
   const {
@@ -25,15 +25,15 @@ const App = () => {
     addWedgeLayer,
     removeWedgeLayer,
     handleWedgeChange,
-    addInitiative,
-    removeInitiative,
-    handleInitiativeChange,
+    addLabel,
+    removeLabel,
+    handleLabelChange,
     resetToDefaults,
     exportToExcel,
     importFromExcel,
     isLoading,
     error,
-    dataVersion
+    dataVersion,
   } = useChartData();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
@@ -46,7 +46,7 @@ const App = () => {
   };
 
   useEffect(() => {
-    console.log('Data or settings updated');
+    console.log("Data or settings updated");
   }, [data, settings, dataVersion]);
 
   return (
@@ -58,11 +58,7 @@ const App = () => {
         </div>
       )}
 
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
+      {error && <div className="error-message">{error}</div>}
 
       <Drawer isOpen={isDrawerOpen}>
         <div>
@@ -78,9 +74,9 @@ const App = () => {
             addWedgeLayer={addWedgeLayer}
             removeWedgeLayer={removeWedgeLayer}
             handleWedgeChange={handleWedgeChange}
-            addInitiative={addInitiative}
-            removeInitiative={removeInitiative}
-            handleInitiativeChange={handleInitiativeChange}
+            addLabel={addLabel}
+            removeLabel={removeLabel}
+            handleLabelChange={handleLabelChange}
             resetToDefaults={resetToDefaults}
             exportToExcel={exportToExcel}
             importFromExcel={handleFileUpload}
@@ -93,7 +89,9 @@ const App = () => {
         <button
           onClick={toggleDrawer}
           className={`${BUTTON_CLASSES.buttonBase} ${
-            isDrawerOpen ? BUTTON_CLASSES.buttonClose : BUTTON_CLASSES.buttonOpen
+            isDrawerOpen
+              ? BUTTON_CLASSES.buttonClose
+              : BUTTON_CLASSES.buttonOpen
           }`}
         >
           {isDrawerOpen ? "Close Settings" : "Open Settings"}

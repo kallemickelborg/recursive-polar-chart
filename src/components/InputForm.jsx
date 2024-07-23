@@ -20,9 +20,9 @@ const InputForm = ({
   addWedgeLayer,
   removeWedgeLayer,
   handleWedgeChange,
-  addInitiative,
-  removeInitiative,
-  handleInitiativeChange,
+  addLabel,
+  removeLabel,
+  handleLabelChange,
   resetToDefaults,
   exportToExcel,
   importFromExcel,
@@ -30,8 +30,14 @@ const InputForm = ({
 }) => {
   const [stylingSettingsExpanded, setStylingSettingsExpanded] = useState(false);
   const [exportSettingsExpanded, setExportSettingsExpanded] = useState(false);
-  const [expandedBranches, setExpandedBranches] = useState({});
-  const [expandedLayers, setExpandedLayers] = useState({});
+  const [expandedItems, setExpandedItems] = useState({});
+
+  const toggleAccordion = (key) => {
+    setExpandedItems((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
 
   const toggleStylingSettings = () => {
     setStylingSettingsExpanded(!stylingSettingsExpanded);
@@ -39,20 +45,6 @@ const InputForm = ({
 
   const toggleExportSettings = () => {
     setExportSettingsExpanded(!exportSettingsExpanded);
-  };
-
-  const toggleBranchDetails = (branchIndex) => {
-    setExpandedBranches((prev) => ({
-      ...prev,
-      [branchIndex]: !prev[branchIndex],
-    }));
-  };
-
-  const toggleLayerDetails = (layerKey) => {
-    setExpandedLayers((prev) => ({
-      ...prev,
-      [layerKey]: !prev[layerKey],
-    }));
   };
 
   const handleSettingChange = (key, value) => {
@@ -108,7 +100,9 @@ const InputForm = ({
             className={GENERAL_CLASSES.accordionButton}
             onClick={toggleStylingSettings}
           >
-            <span>Styling Settings</span>
+            <span className={GENERAL_CLASSES.accordionButtonText}>
+              Styling Settings
+            </span>
             <svg
               className="w-6 h-6"
               fill="none"
@@ -299,9 +293,11 @@ const InputForm = ({
               type="button"
               className={GENERAL_CLASSES.accordionButton}
               aria-expanded="false"
-              onClick={() => toggleBranchDetails(branchIndex)}
+              onClick={() => toggleAccordion(`branch-${branchIndex}`)}
             >
-              <span>{branch.name}</span>
+              <span className={GENERAL_CLASSES.accordionButtonText}>
+                {branch.name}
+              </span>
               <svg
                 className="w-6 h-6"
                 fill="none"
@@ -313,7 +309,7 @@ const InputForm = ({
                   strokeLinejoin="round"
                   strokeWidth={2}
                   d={
-                    expandedBranches[branchIndex]
+                    expandedItems[`branch-${branchIndex}`]
                       ? "M19 9l-7 7-7-7"
                       : "M5 15l7-7 7 7"
                   }
@@ -322,9 +318,9 @@ const InputForm = ({
             </button>
           </h2>
 
-          {expandedBranches[branchIndex] && (
+          {expandedItems[`branch-${branchIndex}`] && (
             <div className={GENERAL_CLASSES.accordionContent}>
-              <div className="mb-4">
+              <div>
                 <label className={INPUT_CLASSES.formLabel}>Branch Name:</label>
                 <input
                   className={INPUT_CLASSES.formInput}
@@ -336,7 +332,7 @@ const InputForm = ({
                 />
               </div>
 
-              <div className="mb-4">
+              <div>
                 <label className={INPUT_CLASSES.formLabel}>Branch Color:</label>
                 <input
                   className="w-20 h-10 p-0 border-0 rounded-lg cursor-pointer"
@@ -358,9 +354,12 @@ const InputForm = ({
               {branch.onionLayers.map((layer, layerIndex) => {
                 const layerKey = `branch-${branchIndex}-layer-${layerIndex}`;
                 return (
-                  <div key={layerKey} className="mt-4">
+                  <div
+                    key={layerKey}
+                    className={GENERAL_CLASSES.sectionWrapper}
+                  >
                     <button
-                      onClick={() => toggleLayerDetails(layerKey)}
+                      onClick={() => toggleAccordion(layerKey)}
                       className={GENERAL_CLASSES.accordionButton}
                     >
                       Onion Layer {layerIndex + 1}
@@ -375,7 +374,7 @@ const InputForm = ({
                           strokeLinejoin="round"
                           strokeWidth={2}
                           d={
-                            expandedLayers[layerKey]
+                            expandedItems[layerKey]
                               ? "M5 15l7-7 7 7"
                               : "M19 9l-7 7-7-7"
                           }
@@ -383,100 +382,110 @@ const InputForm = ({
                       </svg>
                     </button>
 
-                    {expandedLayers[layerKey] && (
+                    {expandedItems[layerKey] && (
                       <div className={GENERAL_CLASSES.accordionContent}>
-                        {layer.wedgeLayers.map((wedge, wedgeIndex) => (
-                          <div
-                            key={`wedge-${wedgeIndex}`}
-                            className={GENERAL_CLASSES.sectionWrapper}
-                          >
-                            <h4 className="text-xl font-semibold mb-2 dark:text-white">
-                              Wedge {wedgeIndex + 1}
-                            </h4>
-                            <div className="mb-2">
-                              <label className={INPUT_CLASSES.formLabel}>
-                                Color:
-                              </label>
-                              <input
-                                type="color"
-                                className="w-16 h-10 border border-gray-300 rounded-md shadow-sm focus:border-blue-500"
-                                value={wedge.color}
-                                onChange={(e) =>
-                                  handleWedgeChange(
-                                    branchIndex,
-                                    layerIndex,
-                                    wedgeIndex,
-                                    "color",
-                                    e.target.value
-                                  )
-                                }
-                              />
-                            </div>
-                            {wedge.labels.map((label, labelIndex) => (
-                              <div
-                                key={`initiative-${labelIndex}`}
-                                className={GENERAL_CLASSES.sectionWrapper}
+                        {layer.wedgeLayers.map((wedgeLayer, wedgeLayerIndex) => (
+                          <div key={`wedge-${wedgeLayerIndex}`}>
+                            <button
+                              onClick={() =>
+                                toggleAccordion(
+                                  `${layerKey}-wedge-${wedgeLayerIndex}`
+                                )
+                              }
+                              className={GENERAL_CLASSES.accordionButton}
+                            >
+                              Wedge {wedgeLayerIndex + 1}
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
                               >
-                                <label className={INPUT_CLASSES.formLabel}>
-                                  Initiative {labelIndex + 1}:
-                                </label>
-                                <input
-                                  type="text"
-                                  className={INPUT_CLASSES.initiativeInput}
-                                  value={label}
-                                  onChange={(e) =>
-                                    handleInitiativeChange(
-                                      branchIndex,
-                                      layerIndex,
-                                      wedgeIndex,
-                                      labelIndex,
-                                      e.target.value
-                                    )
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d={
+                                    expandedItems[
+                                      `${layerKey}-wedge-${wedgeLayerIndex}`
+                                    ]
+                                      ? "M5 15l7-7 7 7"
+                                      : "M19 9l-7 7-7-7"
                                   }
                                 />
+                              </svg>
+                            </button>
+                            {expandedItems[
+                              `${layerKey}-wedge-${wedgeLayerIndex}`
+                            ] && (
+                              <div className={GENERAL_CLASSES.accordionContent}>
+                                {wedgeLayer.labels.map((label, labelIndex) => (
+                                  <div
+                                    key={`label-${labelIndex}`}
+                                    className={GENERAL_CLASSES.sectionWrapper}
+                                  >
+                                    <label className={INPUT_CLASSES.formLabel}>
+                                      Label {labelIndex + 1}:
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className={INPUT_CLASSES.formInput}
+                                      value={label}
+                                      onChange={(e) =>
+                                        handleLabelChange(
+                                          branchIndex,
+                                          layerIndex,
+                                          wedgeLayerIndex,
+                                          labelIndex,
+                                          e.target.value
+                                        )
+                                      }
+                                    />
+                                    <button
+                                      onClick={() =>
+                                        confirm(
+                                          "Are you sure you want to delete this label?"
+                                        ) &&
+                                        removeLabel(
+                                          branchIndex,
+                                          layerIndex,
+                                          wedgeLayerIndex,
+                                          labelIndex
+                                        )
+                                      }
+                                      className={BUTTON_CLASSES.buttonRed}
+                                    >
+                                      Remove Label
+                                    </button>
+                                  </div>
+                                ))}
                                 <button
                                   onClick={() =>
-                                    confirm(
-                                      "Are you sure you want to delete this initiative?"
-                                    ) &&
-                                    removeInitiative(
+                                    addLabel(
                                       branchIndex,
                                       layerIndex,
-                                      wedgeIndex,
-                                      labelIndex
+                                      wedgeLayerIndex
+                                    )
+                                  }
+                                  className={BUTTON_CLASSES.buttonGreen}
+                                >
+                                  Add Label
+                                </button>
+
+                                <button
+                                  onClick={() =>
+                                    removeWedgeLayer(
+                                      branchIndex,
+                                      layerIndex,
+                                      wedgeLayerIndex
                                     )
                                   }
                                   className={BUTTON_CLASSES.buttonRed}
                                 >
-                                  Remove Initiative
+                                  Remove Wedge
                                 </button>
                               </div>
-                            ))}
-                            <button
-                              onClick={() =>
-                                addInitiative(
-                                  branchIndex,
-                                  layerIndex,
-                                  wedgeIndex
-                                )
-                              }
-                              className={BUTTON_CLASSES.buttonGreen}
-                            >
-                              Add Initiative
-                            </button>
-
-                            <button
-                              onClick={() =>
-                                removeWedgeLayer(
-                                  branchIndex,
-                                  layerIndex,
-                                  wedgeIndex
-                                )
-                              }
-                              className={BUTTON_CLASSES.buttonRed}
-                            >
-                              Remove Wedge
-                            </button>
+                            )}
                           </div>
                         ))}
 
@@ -514,6 +523,10 @@ const InputForm = ({
         </div>
       ))}
 
+      <button onClick={addBranch} className={BUTTON_CLASSES.buttonGreen}>
+        Add Branch
+      </button>
+
       {/* Import/Export Settings Accordion */}
       <div className={GENERAL_CLASSES.sectionWrapper}>
         <h2 className="font-semibold text-lg">
@@ -522,7 +535,9 @@ const InputForm = ({
             className={GENERAL_CLASSES.accordionButton}
             onClick={toggleExportSettings}
           >
-            <span>Import/Export Settings</span>
+            <span className={GENERAL_CLASSES.accordionButtonText}>
+              Import/Export Settings
+            </span>
             <svg
               className="w-6 h-6"
               fill="none"
@@ -543,7 +558,7 @@ const InputForm = ({
           <div className={GENERAL_CLASSES.accordionContent}>
             <div className={GENERAL_CLASSES.sectionWrapper}>
               <div className="button-wrapper">
-                {/* Add branch button */}
+                {/* Export to Excel button */}
                 <button
                   onClick={exportToExcel}
                   disabled={isLoading}
@@ -551,7 +566,7 @@ const InputForm = ({
                 >
                   Export to Excel
                 </button>
-
+                {/* Import from Excel button */}
                 <input
                   type="file"
                   accept=".xlsx, .xls"
@@ -560,21 +575,16 @@ const InputForm = ({
                   id="excel-upload"
                   disabled={isLoading}
                 />
-                <label htmlFor="excel-upload">
-                  <button
-                    as="span"
-                    disabled={isLoading}
-                    className={BUTTON_CLASSES.buttonWhite}
-                  >
-                    {isLoading ? "Importing..." : "Import from Excel"}
-                  </button>
-                </label>
                 <button
-                  onClick={addBranch}
-                  className={BUTTON_CLASSES.buttonGreen}
+                  onClick={() =>
+                    document.getElementById("excel-upload").click()
+                  }
+                  disabled={isLoading}
+                  className={`${BUTTON_CLASSES.buttonWhite} w-full`}
                 >
-                  Add Branch
+                  {isLoading ? "Importing..." : "Import from Excel"}
                 </button>
+
                 {/* Export SVG button */}
                 <button
                   onClick={() => exportChart("svg")}
@@ -582,6 +592,7 @@ const InputForm = ({
                 >
                   Export as SVG
                 </button>
+
                 {/* Export PNG button */}
                 <button
                   onClick={() => exportChart("png")}

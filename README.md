@@ -39,7 +39,7 @@ Try out the interactive polarchart: [https://polarchart.netlify.app/](https://po
 
 The polarchart allows users to:
 
-- Add/remove branches, layers, and initiatives
+- Add/remove branches, layers, and labels
 - Customize colors and text
 - Adjust chart dimensions and styling
 - Export the chart as SVG or PNG
