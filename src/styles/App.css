@@ -137,3 +137,24 @@ body {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* Toggle Switch Styles */
+.toggle-checkbox:checked {
+  right: 0;
+  border-color: #68D391;
+  transform: translateX(100%);
+}
+
+.toggle-checkbox:checked + .toggle-label {
+  background-color: #68D391;
+}
+
+.toggle-checkbox {
+  transition: all 0.3s ease-in-out;
+  right: 4px;
+  top: 0;
+}
+
+.toggle-label {
+  transition: all 0.3s ease-in-out;
+}

@@ -344,6 +344,30 @@ const InputForm = ({
                 />
               </div>
 
+              <div className="flex items-center">
+                <label className={INPUT_CLASSES.formLabel}>
+                  Flip Text:
+                </label>
+                <div className="relative inline-block w-10 mr-2 align-middle select-none">
+                  <input
+                    type="checkbox"
+                    id={`flip-text-${branchIndex}`}
+                    checked={branch.flipText || false}
+                    onChange={(e) =>
+                      handleBranchChange(branchIndex, "flipText", e.target.checked)
+                    }
+                    className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                  />
+                  <label
+                    htmlFor={`flip-text-${branchIndex}`}
+                    className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"
+                  ></label>
+                </div>
+                <span className="text-sm text-gray-700">
+                  {branch.flipText ? 'Flipped' : 'Normal'}
+                </span>
+              </div>
+
               <button
                 onClick={() => addOnionLayer(branchIndex)}
                 className={BUTTON_CLASSES.buttonGreen}
