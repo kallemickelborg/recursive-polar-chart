@@ -7,7 +7,7 @@ This project introduces an interactive and recursive polarchart designed to map 
 - Recursive multi-layer polarchart frontend editor
 - Real-time update in SVG format using D3.js
 - Export options (SVG and PNG)
-- Cached data to resume session
+- Cached data to resume session (chart data and settings persisted via `localStorage`)
 - Excel Import/Export
 
 ## Technologies Used
