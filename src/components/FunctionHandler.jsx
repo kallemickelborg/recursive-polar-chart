@@ -111,11 +111,11 @@ const useChartData = () => {
       color: "#333333",
       flipText: false,
       heightAdjustment: 10,
-      onionLayers: Array(3).fill({
-        wedgeLayers: Array(2).fill({
+      onionLayers: Array.from({ length: 3 }, () => ({
+        wedgeLayers: Array.from({ length: 2 }, () => ({
           labels: ["Label"],
-        }),
-      }),
+        })),
+      })),
     };
     setData((prevData) => [...prevData, newBranch]);
   };
@@ -342,11 +342,13 @@ const useChartData = () => {
 
   const hexToRgb = (hex) => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null;
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : null;
   };
 
   return {
