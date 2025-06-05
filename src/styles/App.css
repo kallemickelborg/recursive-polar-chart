@@ -134,19 +134,23 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Toggle Switch Styles */
 .toggle-checkbox:checked {
   right: 0;
-  border-color: #68D391;
+  border-color: #68d391;
   transform: translateX(100%);
 }
 
 .toggle-checkbox:checked + .toggle-label {
-  background-color: #68D391;
+  background-color: #68d391;
 }
 
 .toggle-checkbox {
@@ -157,4 +161,71 @@ body {
 
 .toggle-label {
   transition: all 0.3s ease-in-out;
+}
+
+/* Plus Button System Styles */
+.polar-chart-container {
+  position: relative;
+  display: inline-block;
+}
+
+.plus-buttons-overlay {
+  pointer-events: auto;
+}
+
+.plus-button {
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+  animation: fadeInPlusButton 0.3s ease-out forwards;
+}
+
+.plus-button:hover {
+  opacity: 1;
+}
+
+.plus-button-center {
+  opacity: 0.9;
+}
+
+.plus-button-branch {
+  opacity: 0.8;
+}
+
+.plus-button-layer {
+  opacity: 0.8;
+}
+
+.plus-button-wedge {
+  opacity: 0.8;
+}
+
+.plus-button,
+.plus-button-center,
+.plus-button-branch,
+.plus-button-layer,
+.plus-button-wedge {
+  animation: none;
+  transform: none;
+}
+
+/* Smooth fade-in animation for plus buttons */
+@keyframes fadeInPlusButton {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+}
+
+/* Enhanced visibility on chart hover */
+.polar-chart-container:hover .plus-button {
+  opacity: 0.9;
+}
+
+.polar-chart-container:hover .plus-button:hover {
+  opacity: 1;
 }

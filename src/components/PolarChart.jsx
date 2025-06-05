@@ -1,10 +1,20 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import * as d3 from "d3";
 import WebFont from "webfontloader";
+import PlusButton from "./PlusButton";
+import { calculatePlusButtonPositions } from "./PlusButtonPositions";
 
 WebFont.load({
   google: { families: ["Roboto"] },
 });
+
+// Element types for interaction system
+const ELEMENT_TYPES = {
+  CENTER: "center",
+  BRANCH: "branch",
+  ONION_LAYER: "onionLayer", //RENAME ONION LAYER TO LAYER
+  WEDGE: "wedge",
+};
 
 const LayeredPolarChart = ({
   data,
@@ -15,11 +25,43 @@ const LayeredPolarChart = ({
   bannerWidth,
   maxRadiusRatio,
   innerCircleColor,
-  orgLabelFontSize,
+  orgLabelFontSize, //RENAME
   bannerFontSize,
+  onElementHover,
+  onElementClick,
+  onElementLeave,
+  onAddBranch,
+  onAddOnionLayer, //RENAME
+  onAddWedgeLayer,
+  onOpenCenterSettings,
 }) => {
   const chartRef = useRef(null);
+  const svgRef = useRef(null);
+  const [hoveredElement, setHoveredElement] = useState(null);
+  const [selectedElement, setSelectedElement] = useState(null);
+  const [plusButtonPositions, setPlusButtonPositions] = useState([]);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [visibleButtons, setVisibleButtons] = useState([]);
 
+  // Handle element interactions
+  const handleElementHover = (elementType, indices) => {
+    const elementData = { type: elementType, indices };
+    setHoveredElement(elementData);
+    onElementHover?.(elementData);
+  };
+
+  const handleElementLeave = () => {
+    setHoveredElement(null);
+    onElementLeave?.();
+  };
+
+  const handleElementClick = (elementType, indices) => {
+    const elementData = { type: elementType, indices };
+    setSelectedElement(elementData);
+    onElementClick?.(elementData);
+  };
+
+  // Main chart rendering effect (without hover/selection state)
   useEffect(() => {
     d3.select("#chart").html("");
     const svg = d3
@@ -29,6 +71,8 @@ const LayeredPolarChart = ({
       .attr("height", size)
       .append("g")
       .attr("transform", `translate(${size / 2}, ${size / 2})`);
+
+    svgRef.current = svg;
 
     drawChart(
       svg,
@@ -41,8 +85,26 @@ const LayeredPolarChart = ({
       maxRadiusRatio,
       innerCircleColor,
       orgLabelFontSize,
-      bannerFontSize
+      bannerFontSize,
+      {
+        onElementHover: handleElementHover,
+        onElementLeave: handleElementLeave,
+        onElementClick: handleElementClick,
+        hoveredElement,
+        selectedElement,
+      }
     );
+
+    // REFACTOR THIS FOR BETTER PLUS BUTTON PLACEMENT PROPORTIONAL TO CHART SIZE
+    const radius = (size * maxRadiusRatio) / 2;
+    const positions = calculatePlusButtonPositions(
+      data,
+      radius,
+      innerRadius,
+      bannerWidth,
+      size
+    );
+    setPlusButtonPositions(positions);
   }, [
     data,
     size,
@@ -56,8 +118,191 @@ const LayeredPolarChart = ({
     bannerFontSize,
   ]);
 
-  return <div id="chart" ref={chartRef} />;
+  useEffect(() => {
+    if (!svgRef.current) return;
+
+    // Update visual states of all elements
+    updateElementStates(svgRef.current, hoveredElement, selectedElement);
+  }, [hoveredElement, selectedElement]);
+
+  const handleMouseMove = (event) => {
+    const container = event.currentTarget;
+    const rect = container.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    setMousePosition({ x, y });
+  };
+
+  // Calculate which buttons should be visible based on mouse proximity
+  useEffect(() => {
+    const proximityRadius = 60; // Show buttons within 60px of cursor
+
+    const visible = plusButtonPositions.filter((position) => {
+      const distance = Math.sqrt(
+        Math.pow(position.x - mousePosition.x, 2) +
+          Math.pow(position.y - mousePosition.y, 2)
+      );
+      return distance <= proximityRadius;
+    });
+
+    setVisibleButtons(visible);
+  }, [mousePosition, plusButtonPositions]);
+
+  const handlePlusButtonAction = (position) => {
+    switch (position.action) {
+      case "openCenterSettings":
+        if (onOpenCenterSettings) {
+          onOpenCenterSettings();
+        }
+        break;
+      case "addBranch":
+        if (onAddBranch) {
+          onAddBranch(position.insertIndex);
+        }
+        break;
+      case "addOnionLayer":
+        if (onAddOnionLayer) {
+          onAddOnionLayer(position.branchIndex, position.insertIndex);
+        }
+        break;
+      case "addWedgeLayer":
+        if (onAddWedgeLayer) {
+          onAddWedgeLayer(
+            position.branchIndex,
+            position.layerIndex,
+            position.insertIndex
+          );
+        }
+        break;
+    }
+  };
+
+  return (
+    <div
+      className="polar-chart-container"
+      style={{
+        position: "relative",
+        display: "inline-block",
+        width: size,
+        height: size,
+      }}
+      onMouseMove={handleMouseMove}
+    >
+      <div id="chart" ref={chartRef} />
+
+      {/* Plus buttons overlay - proximity-based visibility */}
+      <svg
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: size,
+          height: size,
+          pointerEvents: "none",
+          zIndex: 10,
+        }}
+      >
+        <g className="plus-buttons-overlay" style={{ pointerEvents: "auto" }}>
+          {visibleButtons.map((position, index) => (
+            <g key={`plus-wrapper-${position.type}-${index}`}>
+              {/* Larger invisible clickable area with tooltip */}
+              <circle
+                cx={position.x}
+                cy={position.y}
+                r={position.type === "center" ? 28 : 24}
+                fill="transparent"
+                style={{ cursor: "pointer" }}
+                onClick={() => handlePlusButtonAction(position)}
+              >
+                <title>{position.tooltip}</title>
+              </circle>
+
+              {/* Visible plus button circle */}
+              <circle
+                cx={position.x}
+                cy={position.y}
+                r={12}
+                fill="#2196F3"
+                stroke="white"
+                strokeWidth="2"
+                style={{ cursor: "pointer" }}
+                onClick={() => handlePlusButtonAction(position)}
+                className={`plus-button plus-button-${position.type}`}
+              >
+                <title>{position.tooltip}</title>
+              </circle>
+
+              {/* Plus icon */}
+              <g fill="white" style={{ pointerEvents: "none" }}>
+                <rect
+                  x={position.x - 6}
+                  y={position.y - 1.5}
+                  width={12}
+                  height={3}
+                  rx={1.5}
+                />
+                <rect
+                  x={position.x - 1.5}
+                  y={position.y - 6}
+                  width={3}
+                  height={12}
+                  rx={1.5}
+                />
+              </g>
+            </g>
+          ))}
+        </g>
+      </svg>
+    </div>
+  );
 };
+
+// Helper function to update element states without full re-render
+function updateElementStates(svg, hoveredElement, selectedElement) {
+  // Reset all strokes first
+  svg
+    .selectAll("path, circle, text")
+    .style("stroke", null)
+    .style("stroke-width", null);
+
+  // Apply hover state
+  if (hoveredElement) {
+    const hoverSelector = getElementSelector(
+      hoveredElement.type,
+      hoveredElement.indices
+    );
+    svg
+      .selectAll(hoverSelector)
+      .style("stroke", "#ffffff")
+      .style("stroke-width", 2);
+  }
+
+  // Apply selection state (overrides hover)
+  if (selectedElement) {
+    const selectedSelector = getElementSelector(
+      selectedElement.type,
+      selectedElement.indices
+    );
+    svg
+      .selectAll(selectedSelector)
+      .style("stroke", "#ffff00")
+      .style("stroke-width", 3);
+  }
+}
+
+// Helper function for hover and selection states
+function getElementSelector(elementType, indices) {
+  switch (elementType) {
+    case ELEMENT_TYPES.CENTER:
+      return `[data-element-type="center"]`;
+    case ELEMENT_TYPES.BRANCH:
+      return `[data-element-type="branch"][data-branch-index="${indices.branchIndex}"]`;
+    case ELEMENT_TYPES.WEDGE:
+      return `[data-element-type="wedge"][data-branch-index="${indices.branchIndex}"][data-layer-index="${indices.layerIndex}"][data-wedge-index="${indices.wedgeIndex}"]`;
+    default:
+      return "";
+  }
+}
 
 function drawChart(
   svg,
@@ -70,7 +315,8 @@ function drawChart(
   maxRadiusRatio,
   innerCircleColor,
   orgLabelFontSize,
-  bannerFontSize
+  bannerFontSize,
+  interactions
 ) {
   const radius = size / 2;
   const maxRadius = radius * maxRadiusRatio;
@@ -80,7 +326,8 @@ function drawChart(
     innerRadius,
     orgLabel,
     innerCircleColor,
-    orgLabelFontSize
+    orgLabelFontSize,
+    interactions
   );
   drawCommunityBanners(
     svg,
@@ -88,7 +335,8 @@ function drawChart(
     radius,
     innerRadius,
     bannerWidth,
-    bannerFontSize
+    bannerFontSize,
+    interactions
   );
   drawCommunitySections(
     svg,
@@ -97,8 +345,36 @@ function drawChart(
     innerRadius,
     bannerWidth,
     maxRadius,
-    fontSize
+    fontSize,
+    interactions
   );
+}
+
+// Helper function to make elements interactive
+function makeElementInteractive(element, elementType, indices, interactions) {
+  if (!interactions) return element;
+
+  // Add data attributes for targeting
+  element.attr("data-element-type", elementType);
+  if (indices.branchIndex !== undefined)
+    element.attr("data-branch-index", indices.branchIndex);
+  if (indices.layerIndex !== undefined)
+    element.attr("data-layer-index", indices.layerIndex);
+  if (indices.wedgeIndex !== undefined)
+    element.attr("data-wedge-index", indices.wedgeIndex);
+
+  return element
+    .style("cursor", "pointer")
+    .on("mouseenter", () => {
+      interactions.onElementHover(elementType, indices);
+    })
+    .on("mouseleave", () => {
+      interactions.onElementLeave();
+    })
+    .on("click", (event) => {
+      event.stopPropagation();
+      interactions.onElementClick(elementType, indices);
+    });
 }
 
 function drawInnerCircle(
@@ -106,15 +382,19 @@ function drawInnerCircle(
   innerRadius,
   orgLabel,
   innerCircleColor,
-  orgLabelFontSize
+  orgLabelFontSize,
+  interactions
 ) {
-  svg
+  const circle = svg
     .append("circle")
     .attr("r", innerRadius)
     .attr("fill", innerCircleColor)
     .attr("filter", "url(#shadow)");
 
-  svg
+  // Center Circle Interaction
+  makeElementInteractive(circle, ELEMENT_TYPES.CENTER, {}, interactions);
+
+  const text = svg
     .append("text")
     .attr("text-anchor", "middle")
     .attr("dy", "0.35em")
@@ -130,7 +410,8 @@ function drawCommunityBanners(
   radius,
   innerRadius,
   bannerWidth,
-  bannerFontSize
+  bannerFontSize,
+  interactions
 ) {
   const anglePerCommunity = (2 * Math.PI) / data.length;
 
@@ -139,7 +420,6 @@ function drawCommunityBanners(
     const endAngle = startAngle + anglePerCommunity;
     const middleRadius = innerRadius + bannerWidth / 2;
 
-    // Draw the banner arc (background)
     const bannerArc = d3
       .arc()
       .innerRadius(innerRadius)
@@ -147,12 +427,20 @@ function drawCommunityBanners(
       .startAngle(startAngle)
       .endAngle(endAngle);
 
-    svg
+    const bannerPath = svg
       .append("path")
       .attr("d", bannerArc)
       .attr("fill", community.color)
       .attr("stroke", "white")
       .attr("stroke-width", 1);
+
+    // Banner Interaction
+    makeElementInteractive(
+      bannerPath,
+      ELEMENT_TYPES.BRANCH,
+      { branchIndex: index },
+      interactions
+    );
 
     // --- Use a true SVG arc path for the text ---
     const midAngle = (startAngle + endAngle) / 2;
@@ -214,7 +502,8 @@ function drawCommunitySections(
   innerRadius,
   bannerWidth,
   maxRadius,
-  fontSize
+  fontSize,
+  interactions
 ) {
   data.forEach((community, communityIndex) => {
     const communityAngleStart = (communityIndex * (2 * Math.PI)) / data.length;
@@ -223,6 +512,14 @@ function drawCommunitySections(
 
     let previousLayerOuterRadius = innerRadius + bannerWidth;
     community.onionLayers.forEach((layer, layerIndex) => {
+      // Skip layers with no wedges to prevent division by zero and rendering errors
+      if (!layer.wedgeLayers || layer.wedgeLayers.length === 0) {
+        console.warn(
+          `Skipping layer ${layerIndex} in branch ${communityIndex} - no wedges found`
+        );
+        return;
+      }
+
       const layerHeight =
         (maxRadius - previousLayerOuterRadius) /
           (community.onionLayers.length - layerIndex) +
@@ -251,17 +548,31 @@ function drawCommunitySections(
           community.onionLayers.length
         );
 
-        svg
+        const wedgePath = svg
           .append("path")
           .attr("d", arc)
           .attr("fill", layerColor)
           .attr("stroke", "white")
           .attr("stroke-width", 1);
 
-        if (wedgeLayer.labels && Array.isArray(wedgeLayer.labels)) {
+        const wedgeIndices = {
+          branchIndex: communityIndex,
+          layerIndex: layerIndex,
+          wedgeIndex: wedgeLayerIndex,
+        };
+
+        // Wedge Interaction
+        makeElementInteractive(
+          wedgePath,
+          ELEMENT_TYPES.WEDGE,
+          wedgeIndices,
+          interactions
+        );
+
+        if (wedgeLayer.label) {
           drawLabels(
             svg,
-            wedgeLayer.labels,
+            [wedgeLayer.label], // REFACTOR TO ONLY ALLOW ONE LABEL PER WEDGE
             arc,
             wedgeStartAngle,
             wedgeEndAngle,
@@ -272,7 +583,8 @@ function drawCommunitySections(
             layerIndex,
             wedgeLayerIndex,
             community,
-            data.length
+            data.length,
+            interactions
           );
         }
       });
@@ -282,7 +594,7 @@ function drawCommunitySections(
   });
 }
 
-// Helper function to break text into multiple lines based on available width
+// Helper function to break text into multiple lines based on available width REFACTOR THIS FOR BETTER TEXT BREAKING IN CORRECT ORDER
 function breakTextIntoLines(text, maxCharsPerLine) {
   const words = text.split(" ");
   const lines = [];
@@ -296,7 +608,6 @@ function breakTextIntoLines(text, maxCharsPerLine) {
         lines.push(currentLine);
         currentLine = word;
       } else {
-        // Word is longer than max chars, just add it
         lines.push(word);
       }
     }
@@ -322,7 +633,8 @@ function drawLabels(
   layerIndex,
   wedgeLayerIndex,
   communityData,
-  totalCommunities
+  totalCommunities,
+  interactions
 ) {
   const shouldFlip = communityData?.flipText || false;
 
@@ -338,53 +650,41 @@ function drawLabels(
   let calculatedMaxChars = Math.floor((arcLength * 0.8) / avgCharWidth);
   const maxCharsPerLine = Math.max(5, calculatedMaxChars); // Ensure min 5 chars, or calculated
 
-  // Calculate the branch (community) center angle for consistent flip decision across all wedges in the branch
-  // This ensures all wedges in a branch have the same text orientation
+  // TEXT FLIPPING LOGIC
   const branchCenterAngle =
     ((communityIndex + 0.5) * (2 * Math.PI)) / totalCommunities;
 
-  // Determine if we need to flip the arc direction for bottom text
-  // Use the branch center angle instead of individual wedge midAngle for consistency
+  // Flip bottom branches
   const needsFlip =
     branchCenterAngle > Math.PI / 2 && branchCenterAngle < (3 * Math.PI) / 2;
   const actualFlip = shouldFlip ? !needsFlip : needsFlip;
-
-  // Calculate arc angles with padding - same for all lines
   const angularPadding = angleSpan * 0.05; // 5% padding
   let arcStartAngle, arcEndAngle;
 
   if (actualFlip) {
-    // For flipped text, reverse the arc direction
     arcStartAngle = wedgeEndAngle - angularPadding;
     arcEndAngle = wedgeStartAngle + angularPadding;
   } else {
-    // Normal direction
     arcStartAngle = wedgeStartAngle + angularPadding;
     arcEndAngle = wedgeEndAngle - angularPadding;
   }
 
-  // Process each label
+  // REFACTOR/SIMPLIFY START FOR THE LINE BREAKING LOGIC
   labels.forEach((label, labelIndex) => {
-    // Break label into multiple lines if needed
     const semanticTextLines =
       maxCharsPerLine > 4 && label.length > maxCharsPerLine
         ? breakTextIntoLines(label, maxCharsPerLine)
         : [label];
 
-    // Calculate vertical spacing for multiple lines
     const lineSpacing = Math.min(
       segmentWidth / Math.max(semanticTextLines.length, 2),
       fontSize * 1.2
     );
 
     semanticTextLines.forEach((lineContent, semanticLineIndex) => {
-      // Base offset factor: - (length-1)/2 for line 0, up to + (length-1)/2 for last line
       let radiusOffsetFactor =
         semanticLineIndex - (semanticTextLines.length - 1) / 2;
 
-      // If actualFlip is true, the visual order of lines along the reversed path is inverted
-      // relative to their radial stacking. To make semantic line 0 appear visually first (topmost)
-      // when the path is reversed, it needs the largest radial distance (most positive offset factor).
       if (actualFlip) {
         radiusOffsetFactor = -radiusOffsetFactor;
       }
@@ -392,8 +692,8 @@ function drawLabels(
       const radiusOffset = radiusOffsetFactor * (lineSpacing * 0.8);
 
       let lineRadius = Math.max(
-        innerRadius + segmentWidth * 0.1, // Min bound (slightly reduced padding for more space)
-        Math.min(outerRadius - segmentWidth * 0.1, textRadius + radiusOffset) // Max bound
+        innerRadius + segmentWidth * 0.1,
+        Math.min(outerRadius - segmentWidth * 0.1, textRadius + radiusOffset)
       );
 
       if (!isFinite(lineRadius)) {
@@ -403,10 +703,10 @@ function drawLabels(
           textRadius,
           radiusOffset,
         });
-        lineRadius = textRadius; // Fallback
+        lineRadius = textRadius;
       }
 
-      // Create unique IDs using semanticLineIndex to keep them stable
+      // REFACTOR FOR ORDERING THE LINES IN THE CORRECT ORDER
       const pathId = `text-arc-${communityIndex}-${layerIndex}-${wedgeLayerIndex}-${labelIndex}-${semanticLineIndex}`;
       const textId = `text-${communityIndex}-${layerIndex}-${wedgeLayerIndex}-${labelIndex}-${semanticLineIndex}`;
 
@@ -422,16 +722,12 @@ function drawLabels(
       const angleDiff = Math.abs(arcEndAngle - arcStartAngle);
       let largeArcFlag = angleDiff > Math.PI ? 1 : 0;
 
-      // Prevent zero-length arcs for textPath if angles are identical (can happen with extreme padding)
       if (Math.abs(arcStartAngle - arcEndAngle) < 0.001) {
-        // console.warn("Near zero-length arc for text, adjusting slightly:", pathId);
         if (actualFlip) {
-          // Reversed path, end angle was original start
           arcEndAngle -= 0.001;
         } else {
           arcEndAngle += 0.001;
         }
-        // Recalculate x2, y2
         x2 = lineRadius * Math.cos(arcEndAngle - Math.PI / 2);
         y2 = lineRadius * Math.sin(arcEndAngle - Math.PI / 2);
       }
@@ -445,7 +741,7 @@ function drawLabels(
           lineRadius,
           pathId,
         });
-        return; // Skip rendering this line if coordinates are bad
+        return;
       }
 
       const pathData = `M ${x1} ${y1} A ${lineRadius} ${lineRadius} 0 ${largeArcFlag} ${sweepFlag} ${x2} ${y2}`;
@@ -469,19 +765,17 @@ function drawLabels(
         .attr("href", `#${pathId}`)
         .attr("startOffset", "50%")
         .style("text-anchor", "middle")
-        .style("dominant-baseline", "middle") // Consistent baseline
+        .style("dominant-baseline", "middle")
         .text(lineContent);
 
-      // dy adjustments based on path direction
       if (actualFlip) {
-        // Path is reversed (counter-clockwise), text on "bottom"
         textPath.attr("dy", "0.35em");
       } else {
-        // Path is normal (clockwise), text on "top"
         textPath.attr("dy", "-0.15em");
       }
     });
   });
+  // REFACTOR/SIMPLIFY END
 }
 
 function wrapTextCentered(text, label, maxWidth, fontSize) {
@@ -507,7 +801,7 @@ function wrapTextCentered(text, label, maxWidth, fontSize) {
       i === words.length - 1
     ) {
       if (tspan.node().getComputedTextLength() > maxWidth) {
-        currentLine.pop(); // Remove the last word that made it too long
+        currentLine.pop();
         tspan.text(currentLine.join(" "));
 
         // Start a new line with the current word
@@ -531,11 +825,7 @@ function wrapTextCentered(text, label, maxWidth, fontSize) {
   text.attr("transform", `translate(0, ${-textHeight / 2}px)`);
 }
 
-// Keep the old wrapText function for backward compatibility
-function wrapText(text, label, maxWidth) {
-  wrapTextCentered(text, label, maxWidth, 12); // Default font size of 12 if not specified
-}
-
+// CALCULATES LAYER COLOR BASED ON THE BASE COLOR AND THE LAYER INDEX
 function calculateLayerColor(baseColor, layerIndex, totalLayers) {
   const rgb = hexToRgb(baseColor);
   let opacity;

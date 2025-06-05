@@ -51,7 +51,7 @@ const useChartData = () => {
       const newSettings = XLSX.utils.sheet_to_json(settingsSheet)[0];
       const branchesData = XLSX.utils.sheet_to_json(branchesSheet);
 
-      // Reconstruct the branches structure
+      // Reconstruct the branches structure with single labels
       const newBranches = [];
       branchesData.forEach((row) => {
         let branch = newBranches.find((b) => b.name === row.BranchName);
@@ -59,8 +59,8 @@ const useChartData = () => {
           branch = {
             name: row.BranchName,
             color: row.BranchColor,
-            flipText: row.BranchFlipText,
-            heightAdjustment: row.BranchHeightAdjustment,
+            flipText: row.BranchFlipText || false,
+            heightAdjustment: row.BranchHeightAdjustment || 10,
             onionLayers: [],
           };
           newBranches.push(branch);
@@ -74,11 +74,9 @@ const useChartData = () => {
 
         let wedge = layer.wedgeLayers[row.WedgeLayerIndex];
         if (!wedge) {
-          wedge = { labels: [] };
+          wedge = { label: row.Label || "Label" };
           layer.wedgeLayers[row.WedgeLayerIndex] = wedge;
         }
-
-        wedge.labels[row.LabelIndex] = row.Label;
       });
 
       // Update state in a single batch
@@ -105,7 +103,7 @@ const useChartData = () => {
     localStorage.clear();
   };
 
-  const addBranch = () => {
+  const addBranch = (insertIndex = null) => {
     const newBranch = {
       name: "New Branch",
       color: "#333333",
@@ -113,11 +111,22 @@ const useChartData = () => {
       heightAdjustment: 10,
       onionLayers: Array.from({ length: 3 }, () => ({
         wedgeLayers: Array.from({ length: 2 }, () => ({
-          labels: ["Label"],
+          label: "New Label",
         })),
       })),
     };
-    setData((prevData) => [...prevData, newBranch]);
+
+    setData((prevData) => {
+      if (insertIndex === null || insertIndex >= prevData.length) {
+        // Add at end
+        return [...prevData, newBranch];
+      } else {
+        // Insert at specific position
+        const newData = [...prevData];
+        newData.splice(insertIndex, 0, newBranch);
+        return newData;
+      }
+    });
   };
 
   const removeBranch = (branchIndex) => {
@@ -132,21 +141,31 @@ const useChartData = () => {
     );
   };
 
-  const addOnionLayer = (branchIndex) => {
+  const addOnionLayer = (branchIndex, insertIndex = null) => {
     setData((prevData) =>
-      prevData.map((branch, index) =>
-        index === branchIndex
-          ? {
-              ...branch,
-              onionLayers: [
-                ...branch.onionLayers,
-                {
-                  wedgeLayers: [{ labels: ["New Label"] }],
-                },
-              ],
-            }
-          : branch
-      )
+      prevData.map((branch, index) => {
+        if (index !== branchIndex) return branch;
+
+        const newLayer = {
+          wedgeLayers: [{ label: "New Label" }],
+        };
+
+        if (insertIndex === null || insertIndex >= branch.onionLayers.length) {
+          // Add at end
+          return {
+            ...branch,
+            onionLayers: [...branch.onionLayers, newLayer],
+          };
+        } else {
+          // Insert at specific position
+          const newLayers = [...branch.onionLayers];
+          newLayers.splice(insertIndex, 0, newLayer);
+          return {
+            ...branch,
+            onionLayers: newLayers,
+          };
+        }
+      })
     );
   };
 
@@ -165,52 +184,84 @@ const useChartData = () => {
     );
   };
 
-  const addWedgeLayer = (branchIndex, layerIndex) => {
+  const addWedgeLayer = (branchIndex, layerIndex, insertIndex = null) => {
     setData((prevData) =>
-      prevData.map((branch, index) =>
-        index === branchIndex
-          ? {
-              ...branch,
-              onionLayers: branch.onionLayers.map((layer, lIndex) =>
-                lIndex === layerIndex
-                  ? {
-                      ...layer,
-                      wedgeLayers: [
-                        ...layer.wedgeLayers,
-                        { labels: ["New Label"] },
-                      ],
-                    }
-                  : layer
-              ),
+      prevData.map((branch, index) => {
+        if (index !== branchIndex) return branch;
+
+        return {
+          ...branch,
+          onionLayers: branch.onionLayers.map((layer, lIndex) => {
+            if (lIndex !== layerIndex) return layer;
+
+            const newWedge = { label: "New Label" };
+
+            if (
+              insertIndex === null ||
+              insertIndex >= layer.wedgeLayers.length
+            ) {
+              // Add at end
+              return {
+                ...layer,
+                wedgeLayers: [...layer.wedgeLayers, newWedge],
+              };
+            } else {
+              // Insert at specific position
+              const newWedges = [...layer.wedgeLayers];
+              newWedges.splice(insertIndex, 0, newWedge);
+              return {
+                ...layer,
+                wedgeLayers: newWedges,
+              };
             }
-          : branch
-      )
+          }),
+        };
+      })
     );
   };
 
-  const removeWedgeLayer = (branchIndex, layerIndex, wedgeIndex) => {
-    setData((prevData) =>
-      prevData.map((branch, index) =>
-        index === branchIndex
-          ? {
-              ...branch,
-              onionLayers: branch.onionLayers.map((layer, lIndex) =>
-                lIndex === layerIndex
-                  ? {
-                      ...layer,
-                      wedgeLayers: layer.wedgeLayers.filter(
-                        (_, wIndex) => wIndex !== wedgeIndex
-                      ),
-                    }
-                  : layer
-              ),
-            }
-          : branch
-      )
-    );
+  const removeWedgeLayer = (branchIndex, layerIndex, wedgeIndex, onSuccess) => {
+    setData((prevData) => {
+      const newData = prevData.map((branch, index) => {
+        if (index !== branchIndex) return branch;
+
+        const targetLayer = branch.onionLayers[layerIndex];
+
+        // Prevent removing the last wedge from a layer
+        if (targetLayer.wedgeLayers.length <= 1) {
+          console.warn(
+            "Cannot remove the last wedge from a layer. Each layer must have at least one wedge."
+          );
+          return branch;
+        }
+
+        return {
+          ...branch,
+          onionLayers: branch.onionLayers.map((layer, lIndex) =>
+            lIndex === layerIndex
+              ? {
+                  ...layer,
+                  wedgeLayers: layer.wedgeLayers.filter(
+                    (_, wIndex) => wIndex !== wedgeIndex
+                  ),
+                }
+              : layer
+          ),
+        };
+      });
+
+      // Check if the removal actually happened by comparing the data
+      const wasRemoved = newData !== prevData;
+      if (wasRemoved && onSuccess) {
+        // Execute callback after state update
+        setTimeout(() => onSuccess(), 0);
+      }
+
+      return newData;
+    });
   };
 
-  const addLabel = (branchIndex, layerIndex, wedgeIndex) => {
+  const handleLabelChange = (branchIndex, layerIndex, wedgeIndex, value) => {
     setData((prevData) =>
       prevData.map((branch, index) =>
         index === branchIndex
@@ -224,71 +275,7 @@ const useChartData = () => {
                         wIndex === wedgeIndex
                           ? {
                               ...wedge,
-                              labels: [...wedge.labels, "New Label"],
-                            }
-                          : wedge
-                      ),
-                    }
-                  : layer
-              ),
-            }
-          : branch
-      )
-    );
-  };
-
-  const removeLabel = (branchIndex, layerIndex, wedgeIndex, labelIndex) => {
-    setData((prevData) =>
-      prevData.map((branch, index) =>
-        index === branchIndex
-          ? {
-              ...branch,
-              onionLayers: branch.onionLayers.map((layer, lIndex) =>
-                lIndex === layerIndex
-                  ? {
-                      ...layer,
-                      wedgeLayers: layer.wedgeLayers.map((wedge, wIndex) =>
-                        wIndex === wedgeIndex
-                          ? {
-                              ...wedge,
-                              labels: wedge.labels.filter(
-                                (_, iIndex) => iIndex !== labelIndex
-                              ),
-                            }
-                          : wedge
-                      ),
-                    }
-                  : layer
-              ),
-            }
-          : branch
-      )
-    );
-  };
-
-  const handleLabelChange = (
-    branchIndex,
-    layerIndex,
-    wedgeIndex,
-    labelIndex,
-    value
-  ) => {
-    setData((prevData) =>
-      prevData.map((branch, index) =>
-        index === branchIndex
-          ? {
-              ...branch,
-              onionLayers: branch.onionLayers.map((layer, lIndex) =>
-                lIndex === layerIndex
-                  ? {
-                      ...layer,
-                      wedgeLayers: layer.wedgeLayers.map((wedge, wIndex) =>
-                        wIndex === wedgeIndex
-                          ? {
-                              ...wedge,
-                              labels: wedge.labels.map((label, iIndex) =>
-                                iIndex === labelIndex ? value : label
-                              ),
+                              label: value,
                             }
                           : wedge
                       ),
@@ -308,30 +295,25 @@ const useChartData = () => {
     const settingsWS = XLSX.utils.json_to_sheet([settings]);
     XLSX.utils.book_append_sheet(wb, settingsWS, "Settings");
 
-    // Prepare branches data for Excel
+    // Prepare branches data for Excel with single labels
     const branchesData = data.flatMap((branch, branchIndex) =>
       branch.onionLayers.flatMap((layer, layerIndex) =>
-        layer.wedgeLayers.flatMap((wedge, wedgeIndex) =>
-          wedge.labels.map((label, labelIndex) => ({
-            BranchName: branch.name,
-            BranchColor: branch.color,
-            BranchFlipText: branch.flipText,
-            BranchHeightAdjustment: branch.heightAdjustment,
-            OnionLayerIndex: layerIndex,
-            WedgeLayerIndex: wedgeIndex,
-            LabelIndex: labelIndex,
-            Label: label,
-          }))
-        )
+        layer.wedgeLayers.map((wedge, wedgeIndex) => ({
+          BranchName: branch.name,
+          BranchColor: branch.color,
+          BranchFlipText: branch.flipText || false,
+          BranchHeightAdjustment: branch.heightAdjustment || 10,
+          OnionLayerIndex: layerIndex,
+          WedgeLayerIndex: wedgeIndex,
+          Label: wedge.label || "Label",
+        }))
       )
     );
 
-    // Convert branches data to worksheet
     const branchesWS = XLSX.utils.json_to_sheet(branchesData);
     XLSX.utils.book_append_sheet(wb, branchesWS, "Branches");
 
-    // Save the file
-    XLSX.writeFile(wb, "chart_data.xlsx");
+    XLSX.writeFile(wb, "chart-data.xlsx");
   };
 
   const calculateLayerColor = (baseColor, layerIndex, totalLayers) => {
@@ -362,8 +344,6 @@ const useChartData = () => {
     removeOnionLayer,
     addWedgeLayer,
     removeWedgeLayer,
-    addLabel,
-    removeLabel,
     handleLabelChange,
     resetToDefaults,
     exportToExcel,

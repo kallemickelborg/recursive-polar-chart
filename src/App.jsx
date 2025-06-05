@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import InputForm from "./components/InputForm";
 import LayeredPolarChart from "./components/PolarChart";
 import Drawer from "./components/Drawer";
+import ContextualSettingsPanel from "./components/ContextualSettingsPanel";
 
 // Hooks
 import useChartData from "./components/FunctionHandler";
@@ -24,9 +25,6 @@ const App = () => {
     removeOnionLayer,
     addWedgeLayer,
     removeWedgeLayer,
-    handleWedgeChange,
-    addLabel,
-    removeLabel,
     handleLabelChange,
     resetToDefaults,
     exportToExcel,
@@ -35,8 +33,65 @@ const App = () => {
     error,
     dataVersion,
   } = useChartData();
+
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedElement, setSelectedElement] = useState(null);
+
   const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
+
+  const handleElementClick = (elementData) => {
+    setSelectedElement(elementData);
+    setIsDrawerOpen(false);
+  };
+
+  const handleCloseSettings = () => {
+    setSelectedElement(null);
+  };
+
+  const handleRemoveWedgeLayer = (branchIndex, layerIndex, wedgeIndex) => {
+    removeWedgeLayer(branchIndex, layerIndex, wedgeIndex, () => {
+      setSelectedElement(null);
+    });
+  };
+
+  const handlePlusOpenCenterSettings = () => {
+    const centerElement = { type: "center", indices: {} };
+    setSelectedElement(centerElement);
+    setIsDrawerOpen(false);
+  };
+
+  const handlePlusAddBranch = (insertIndex) => {
+    addBranch(insertIndex);
+    setIsDrawerOpen(false);
+  };
+
+  const handlePlusAddOnionLayer = (branchIndex, insertIndex) => {
+    addOnionLayer(branchIndex, insertIndex);
+    setIsDrawerOpen(false);
+  };
+
+  const handlePlusAddWedgeLayer = (branchIndex, layerIndex, insertIndex) => {
+    addWedgeLayer(branchIndex, layerIndex, insertIndex);
+    setIsDrawerOpen(false);
+  };
+
+  const handleDeleteBranch = (branchIndex) => {
+    const branch = data[branchIndex];
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${branch.name}"?\n\n` +
+        `This will permanently remove:\n` +
+        `• The entire branch\n` +
+        `• All ${branch.onionLayers.length} onion layers\n` +
+        `• All wedges and their labels\n\n` +
+        `This action cannot be undone.`
+    );
+
+    if (confirmed) {
+      removeBranch(branchIndex);
+      setSelectedElement(null);
+      setIsDrawerOpen(false);
+    }
+  };
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
@@ -63,20 +118,8 @@ const App = () => {
       <Drawer isOpen={isDrawerOpen}>
         <div>
           <InputForm
-            data={data}
             settings={settings}
             updateSettings={updateSettings}
-            addBranch={addBranch}
-            removeBranch={removeBranch}
-            handleBranchChange={handleBranchChange}
-            addOnionLayer={addOnionLayer}
-            removeOnionLayer={removeOnionLayer}
-            addWedgeLayer={addWedgeLayer}
-            removeWedgeLayer={removeWedgeLayer}
-            handleWedgeChange={handleWedgeChange}
-            addLabel={addLabel}
-            removeLabel={removeLabel}
-            handleLabelChange={handleLabelChange}
             resetToDefaults={resetToDefaults}
             exportToExcel={exportToExcel}
             importFromExcel={handleFileUpload}
@@ -85,10 +128,25 @@ const App = () => {
         </div>
       </Drawer>
 
+      <ContextualSettingsPanel
+        selectedElement={selectedElement}
+        data={data}
+        settings={settings}
+        onClose={handleCloseSettings}
+        updateSettings={updateSettings}
+        handleBranchChange={handleBranchChange}
+        handleLabelChange={handleLabelChange}
+        addOnionLayer={addOnionLayer}
+        removeOnionLayer={removeOnionLayer}
+        addWedgeLayer={addWedgeLayer}
+        removeWedgeLayer={handleRemoveWedgeLayer}
+        onDeleteBranch={handleDeleteBranch}
+      />
+
       <div className={`main-content ${isDrawerOpen ? "drawer-open" : ""}`}>
         <button
           onClick={toggleDrawer}
-          className={`${BUTTON_CLASSES.buttonBase} ${
+          className={`${BUTTON_CLASSES.drawerBase} ${
             isDrawerOpen
               ? BUTTON_CLASSES.buttonClose
               : BUTTON_CLASSES.buttonOpen
@@ -110,6 +168,11 @@ const App = () => {
               bannerWidth={settings.bannerWidth}
               bannerFontSize={settings.bannerFontSize}
               maxRadiusRatio={settings.maxRadiusRatio}
+              onElementClick={handleElementClick}
+              onAddBranch={handlePlusAddBranch}
+              onAddOnionLayer={handlePlusAddOnionLayer}
+              onAddWedgeLayer={handlePlusAddWedgeLayer}
+              onOpenCenterSettings={handlePlusOpenCenterSettings}
               key={dataVersion}
             />
           </div>
