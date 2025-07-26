@@ -129,6 +129,23 @@ const CenterSettings = ({ settings, onSettingsChange, onClose }) => {
           className="w-full"
         />
       </div>
+
+      {/* Banner Height */}
+      <div>
+        <label className={INPUT_CLASSES.formLabel}>
+          Banner Height: {settings.bannerWidth}px
+        </label>
+        <input
+          type="range"
+          min="25"
+          max="150"
+          value={settings.bannerWidth}
+          onChange={(e) =>
+            handleChange("bannerWidth", parseInt(e.target.value))
+          }
+          className="w-full"
+        />
+      </div>
     </div>
   );
 };

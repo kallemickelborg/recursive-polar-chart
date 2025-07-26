@@ -34,11 +34,11 @@ const LayeredPolarChart = ({
   onAddOnionLayer, //RENAME
   onAddWedgeLayer,
   onOpenCenterSettings,
+  selectedElement,
 }) => {
   const chartRef = useRef(null);
   const svgRef = useRef(null);
   const [hoveredElement, setHoveredElement] = useState(null);
-  const [selectedElement, setSelectedElement] = useState(null);
   const [plusButtonPositions, setPlusButtonPositions] = useState([]);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [visibleButtons, setVisibleButtons] = useState([]);
@@ -57,7 +57,6 @@ const LayeredPolarChart = ({
 
   const handleElementClick = (elementType, indices) => {
     const elementData = { type: elementType, indices };
-    setSelectedElement(elementData);
     onElementClick?.(elementData);
   };
 
@@ -177,6 +176,25 @@ const LayeredPolarChart = ({
     }
   };
 
+  // Unselect chart components by clicking outside
+  const handleBackgroundClick = (event) => {
+    // Only unselect if the click is on the background (not on a chart element or plus button)
+    if (event.target === event.currentTarget) {
+      if (typeof window !== "undefined" && window.dispatchEvent) {
+        window.dispatchEvent(new CustomEvent("polarchart-unselect"));
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleUnselect = () => {
+      setHoveredElement(null);
+    };
+    window.addEventListener("polarchart-unselect", handleUnselect);
+    return () =>
+      window.removeEventListener("polarchart-unselect", handleUnselect);
+  }, []);
+
   return (
     <div
       className="polar-chart-container"
@@ -187,6 +205,7 @@ const LayeredPolarChart = ({
         height: size,
       }}
       onMouseMove={handleMouseMove}
+      onClick={handleBackgroundClick}
     >
       <div id="chart" ref={chartRef} />
 

@@ -42,7 +42,8 @@ const InputForm = ({
   };
 
   const exportChart = (format) => {
-    const svgElement = document.querySelector("#polar-chart");
+    // Select the SVG element rendered by D3
+    const svgElement = document.querySelector("#chart svg");
     if (!svgElement) return;
 
     if (format === "svg") {

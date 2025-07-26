@@ -147,7 +147,11 @@ const useChartData = () => {
         if (index !== branchIndex) return branch;
 
         const newLayer = {
-          wedgeLayers: [{ label: "New Label" }],
+          wedgeLayers: [
+            { label: "New Label" },
+            { label: "New Label" },
+            { label: "New Label" },
+          ],
         };
 
         if (insertIndex === null || insertIndex >= branch.onionLayers.length) {

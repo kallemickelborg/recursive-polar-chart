@@ -101,6 +101,13 @@ const App = () => {
   };
 
   useEffect(() => {
+    const handleUnselect = () => setSelectedElement(null);
+    window.addEventListener("polarchart-unselect", handleUnselect);
+    return () =>
+      window.removeEventListener("polarchart-unselect", handleUnselect);
+  }, []);
+
+  useEffect(() => {
     console.log("Data or settings updated");
   }, [data, settings, dataVersion]);
 
@@ -173,6 +180,7 @@ const App = () => {
               onAddOnionLayer={handlePlusAddOnionLayer}
               onAddWedgeLayer={handlePlusAddWedgeLayer}
               onOpenCenterSettings={handlePlusOpenCenterSettings}
+              selectedElement={selectedElement}
               key={dataVersion}
             />
           </div>
