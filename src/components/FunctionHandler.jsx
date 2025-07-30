@@ -60,7 +60,10 @@ const useChartData = () => {
             name: row.BranchName,
             color: row.BranchColor,
             flipText: row.BranchFlipText || false,
-            heightAdjustment: row.BranchHeightAdjustment || 10,
+            ...(row.BannerFontSize && { bannerFontSize: parseInt(row.BannerFontSize) }),
+            ...(row.BannerFontColor && { bannerFontColor: row.BannerFontColor }),
+            ...(row.BannerFontWeight && { bannerFontWeight: row.BannerFontWeight }),
+            ...(row.BannerFontStyle && { bannerFontStyle: row.BannerFontStyle }),
             onionLayers: [],
           };
           newBranches.push(branch);
@@ -74,7 +77,13 @@ const useChartData = () => {
 
         let wedge = layer.wedgeLayers[row.WedgeLayerIndex];
         if (!wedge) {
-          wedge = { label: row.Label || "Label" };
+          wedge = {
+            label: row.Label || "Label",
+            ...(row.FontSize && { fontSize: parseInt(row.FontSize) }),
+            ...(row.FontColor && { fontColor: row.FontColor }),
+            ...(row.FontWeight && { fontWeight: row.FontWeight }),
+            ...(row.FontStyle && { fontStyle: row.FontStyle }),
+          };
           layer.wedgeLayers[row.WedgeLayerIndex] = wedge;
         }
       });
@@ -108,7 +117,6 @@ const useChartData = () => {
       name: "New Branch",
       color: "#333333",
       flipText: false,
-      heightAdjustment: 10,
       onionLayers: Array.from({ length: 3 }, () => ({
         wedgeLayers: Array.from({ length: 2 }, () => ({
           label: "New Label",
@@ -292,6 +300,33 @@ const useChartData = () => {
     );
   };
 
+  const handleWedgeFontChange = (branchIndex, layerIndex, wedgeIndex, property, value) => {
+    setData((prevData) =>
+      prevData.map((branch, index) =>
+        index === branchIndex
+          ? {
+              ...branch,
+              onionLayers: branch.onionLayers.map((layer, lIndex) =>
+                lIndex === layerIndex
+                  ? {
+                      ...layer,
+                      wedgeLayers: layer.wedgeLayers.map((wedge, wIndex) =>
+                        wIndex === wedgeIndex
+                          ? {
+                              ...wedge,
+                              [property]: value,
+                            }
+                          : wedge
+                      ),
+                    }
+                  : layer
+              ),
+            }
+          : branch
+      )
+    );
+  };
+
   const exportToExcel = () => {
     const wb = XLSX.utils.book_new();
 
@@ -306,10 +341,17 @@ const useChartData = () => {
           BranchName: branch.name,
           BranchColor: branch.color,
           BranchFlipText: branch.flipText || false,
-          BranchHeightAdjustment: branch.heightAdjustment || 10,
+          BannerFontSize: branch.bannerFontSize || "",
+          BannerFontColor: branch.bannerFontColor || "",
+          BannerFontWeight: branch.bannerFontWeight || "",
+          BannerFontStyle: branch.bannerFontStyle || "",
           OnionLayerIndex: layerIndex,
           WedgeLayerIndex: wedgeIndex,
           Label: wedge.label || "Label",
+          FontSize: wedge.fontSize || "",
+          FontColor: wedge.fontColor || "",
+          FontWeight: wedge.fontWeight || "",
+          FontStyle: wedge.fontStyle || "",
         }))
       )
     );
@@ -349,6 +391,7 @@ const useChartData = () => {
     addWedgeLayer,
     removeWedgeLayer,
     handleLabelChange,
+    handleWedgeFontChange,
     resetToDefaults,
     exportToExcel,
     importFromExcel,

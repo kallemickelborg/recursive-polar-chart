@@ -1,5 +1,19 @@
 import React from "react";
-import { INPUT_CLASSES, BUTTON_CLASSES } from "../styles/classes";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { Separator } from "@/components/ui/separator";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import {
+  LAYOUT,
+  TEXT,
+  SWITCH,
+  PATTERNS,
+  section,
+  sep
+} from "@/styles/components";
 
 const BranchSettings = ({
   branch,
@@ -9,6 +23,7 @@ const BranchSettings = ({
   onAddLayer,
   onRemoveLayer,
   onDeleteBranch,
+  defaultBannerFontSize,
 }) => {
   const handleChange = (key, value) => {
     onBranchChange(branchIndex, key, value);
@@ -31,133 +46,236 @@ const BranchSettings = ({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">Branch Settings</h3>
-        <button
-          onClick={onClose}
-          className="text-gray-500 hover:text-gray-700 text-xl font-bold"
-        >
-          ×
-        </button>
-      </div>
+    <div className={LAYOUT.dialog}>
+      <CardHeader className={LAYOUT.header}>
+        <div className={LAYOUT.between}>
+          <div className="space-y-1">
+            <CardTitle className={TEXT.title}>
+              Branch Settings
+            </CardTitle>
+            <CardDescription className={TEXT.desc}>
+              Configure branch properties and appearance
+            </CardDescription>
+          </div>
+        </div>
+      </CardHeader>
 
       {/* Branch Name */}
-      <div>
-        <label className={INPUT_CLASSES.formLabel}>Branch Name:</label>
-        <input
-          className={INPUT_CLASSES.formInput}
+      <div className={section('primary')}>
+        <Label htmlFor="branch-name" className={TEXT.label}>
+          Branch Name
+        </Label>
+        <Input
+          id="branch-name"
           type="text"
           value={branch.name}
           onChange={(e) => handleChange("name", e.target.value)}
           placeholder="Enter branch name"
+          className="border-border/50 focus:border-primary/50 transition-colors"
         />
       </div>
 
       {/* Branch Color */}
-      <div>
-        <label className={INPUT_CLASSES.formLabel}>Branch Color:</label>
-        <div className="flex items-center space-x-2">
+      <div className={section('secondary')}>
+        <Label htmlFor="branch-color" className={TEXT.label}>
+          Branch Color
+        </Label>
+        <div className={LAYOUT.start}>
           <input
+            id="branch-color"
             type="color"
             value={branch.color}
             onChange={(e) => handleChange("color", e.target.value)}
-            className="w-12 h-8 border rounded cursor-pointer"
+            className="w-12 h-12 border-2 border-border rounded-lg cursor-pointer shadow-sm hover:shadow-md transition-shadow"
           />
-          <span className="text-sm text-gray-600">{branch.color}</span>
+          <span className={TEXT.code}>
+            {branch.color}
+          </span>
         </div>
       </div>
 
       {/* Flip Text Toggle */}
-      <div className="flex items-center justify-between">
-        <label className={INPUT_CLASSES.formLabel}>Flip Text:</label>
-        <div className="relative inline-block w-10 mr-2 align-middle select-none">
-          <input
-            type="checkbox"
+      <div className={section('primary')}>
+        <Label htmlFor={`flip-text-${branchIndex}`} className={TEXT.label}>
+          Flip Text
+        </Label>
+        <div className={SWITCH.box}>
+          <Switch
             id={`flip-text-${branchIndex}`}
-            checked={branch.flipText || false}
-            onChange={(e) => handleChange("flipText", e.target.checked)}
-            className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+            checked={branch.flipText === true}
+            onCheckedChange={(checked) => handleChange("flipText", checked)}
           />
-          <label
-            htmlFor={`flip-text-${branchIndex}`}
-            className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"
-          ></label>
+          <Label htmlFor={`flip-text-${branchIndex}`} className={SWITCH.label}>
+            <span className={branch.flipText ? SWITCH.active : SWITCH.inactive}>
+              {branch.flipText ? "✓ Text is flipped" : "Text is normal"}
+            </span>
+          </Label>
         </div>
-        <span className="text-sm text-gray-700">
-          {branch.flipText ? "Flipped" : "Normal"}
-        </span>
       </div>
 
-      {/* Height Adjustment */}
-      <div>
-        <label className={INPUT_CLASSES.formLabel}>
-          Height Adjustment: {branch.heightAdjustment || 0}px
-        </label>
-        <input
-          type="range"
-          min="-50"
-          max="50"
-          value={branch.heightAdjustment || 0}
-          onChange={(e) =>
-            handleChange("heightAdjustment", parseInt(e.target.value))
-          }
-          className="w-full"
-        />
+      <Separator className={sep('default')} />
+
+      {/* Banner Font Settings */}
+      <div className={section('secondary')}>
+        <h4 className={TEXT.label}>
+          Banner Font Settings
+        </h4>
+        {/* Banner Font Size */}
+        <div className={PATTERNS.slider.section}>
+          <Label htmlFor="banner-font-size" className={PATTERNS.slider.label}>
+            <span>Font Size</span>
+            <span className={TEXT.value}>
+              {branch.bannerFontSize || defaultBannerFontSize}px
+            </span>
+          </Label>
+          <Slider
+            id="banner-font-size"
+            min={8}
+            max={32}
+            step={1}
+            value={[branch.bannerFontSize || defaultBannerFontSize]}
+            onValueChange={(value) => handleChange("bannerFontSize", value[0])}
+            className={PATTERNS.slider.input}
+          />
+          <div className={PATTERNS.slider.ranges}>
+            <span className={TEXT.rangeVal}>8px</span>
+            <span className="text-center">Default: {defaultBannerFontSize}px</span>
+            <span className={TEXT.rangeVal}>32px</span>
+          </div>
+        </div>
+
+        {/* Banner Font Color */}
+        <div className={PATTERNS.color.section}>
+          <Label htmlFor="banner-font-color" className={PATTERNS.color.label}>Font Color</Label>
+          <div className={PATTERNS.color.wrapper}>
+            <input
+              id="banner-font-color"
+              type="color"
+              value={branch.bannerFontColor || "#ffffff"}
+              onChange={(e) => handleChange("bannerFontColor", e.target.value)}
+              className="w-12 h-12 border-2 border-border rounded-lg cursor-pointer shadow-sm hover:shadow-md transition-shadow"
+            />
+            <div className="flex-1 space-y-1">
+              <span className={TEXT.code}>
+                {branch.bannerFontColor || "#ffffff"}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleChange("bannerFontColor", "#ffffff")}
+                className="h-7 text-xs"
+              >
+                Reset to White
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Banner Font Style */}
+        <div className={PATTERNS.switch.section}>
+          <Label className={PATTERNS.switch.label}>Font Style</Label>
+          <div className={LAYOUT.grid2}>
+            <div className={SWITCH.box}>
+              <Switch
+                id="banner-font-bold"
+                checked={branch.bannerFontWeight === "bold"}
+                onCheckedChange={(checked) => handleChange("bannerFontWeight", checked ? "bold" : "normal")}
+              />
+              <Label htmlFor="banner-font-bold" className={SWITCH.label}>
+                <span className="font-bold">Bold</span>
+              </Label>
+            </div>
+            <div className={SWITCH.box}>
+              <Switch
+                id="banner-font-italic"
+                checked={branch.bannerFontStyle === "italic"}
+                onCheckedChange={(checked) => handleChange("bannerFontStyle", checked ? "italic" : "normal")}
+              />
+              <Label htmlFor="banner-font-italic" className={SWITCH.label}>
+                <span className="italic">Italic</span>
+              </Label>
+            </div>
+          </div>
+        </div>
+
+        {/* Reset Banner Font Settings */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            handleChange("bannerFontSize", null);
+            handleChange("bannerFontColor", null);
+            handleChange("bannerFontWeight", null);
+            handleChange("bannerFontStyle", null);
+          }}
+          className="w-full bg-gradient-to-r from-secondary/50 to-accent/50 hover:from-secondary hover:to-accent border-border/50"
+        >
+          <span className="mr-2">🔄</span>
+          Reset to Default Banner Font Settings
+        </Button>
       </div>
+
+      <Separator className={sep('default')} />
 
       {/* Onion Layers Management */}
-      <div className="border-t pt-4">
-        <div className="flex justify-between items-center mb-2">
-          <label className={INPUT_CLASSES.formLabel}>
-            Onion Layers ({branch.onionLayers.length}):
-          </label>
-          <button
+      <div className={section('primary')}>
+        <div className={LAYOUT.between}>
+          <Label className={TEXT.label}>
+            Onion Layers ({branch.onionLayers.length})
+          </Label>
+          <Button
             onClick={() => onAddLayer(branchIndex)}
-            className={BUTTON_CLASSES.buttonGreen + " text-xs px-2 py-1"}
+            size="sm"
+            className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white"
           >
-            + Add Layer
-          </button>
+            Add Layer
+          </Button>
         </div>
 
-        <div className="space-y-2">
+        <div className={LAYOUT.space2}>
           {branch.onionLayers.map((layer, layerIndex) => (
             <div
               key={layerIndex}
-              className="flex items-center justify-between bg-gray-50 p-2 rounded"
+              className="flex items-center justify-between bg-background/50 p-3 rounded-md border border-border/20"
             >
-              <span className="text-sm">
+              <span className="text-sm font-medium">
                 Layer {layerIndex + 1} ({layer.wedgeLayers.length} wedges)
               </span>
               {branch.onionLayers.length > 1 && (
-                <button
+                <Button
                   onClick={() => handleRemoveLayer(layerIndex)}
-                  className="text-red-500 hover:text-red-700 text-sm"
+                  variant="destructive"
+                  size="sm"
+                  className="h-7 text-xs"
                 >
-                  Remove
-                </button>
+                  Remove Layer
+                </Button>
               )}
             </div>
           ))}
         </div>
       </div>
 
+      <Separator className={sep('danger')} />
+
       {/* Delete Branch Section */}
-      <div className="mt-6 pt-4 border-t border-red-200">
-        <label className={INPUT_CLASSES.formLabel + " text-red-600"}>
-          Danger Zone:
-        </label>
-        <div className="bg-red-50 p-3 rounded border border-red-200">
-          <p className="text-sm text-red-600 mb-3">
+      <div className={section('danger')}>
+        <Label className="text-sm font-semibold text-destructive flex items-center gap-2">
+          Danger Zone
+        </Label>
+        <div className="bg-destructive/5 p-3 rounded-md border border-destructive/20">
+          <p className="text-sm text-destructive/80 mb-3">
             Permanently delete this branch and all its layers and wedges. This
             action cannot be undone.
           </p>
-          <button
+          <Button
             onClick={() => onDeleteBranch && onDeleteBranch(branchIndex)}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+            variant="destructive"
+            className="bg-gradient-to-r from-destructive to-destructive/80 hover:from-destructive/90 hover:to-destructive shadow-lg"
           >
+            <span className="mr-2">🗑️</span>
             Delete Branch
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -6,8 +6,7 @@ const PlusButton = ({
   size = 24,
   action,
   tooltip,
-  className = "",
-  style = {},
+  className = "plus-button",
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -45,6 +44,8 @@ const PlusButton = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
+
+      {/* AUGMENT ALL THE STYLING TO THE .css FILES INSTEAD OF INSTANTIATING THEM PER TAG */}
       {/* Button Background Circle */}
       <circle
         cx={buttonSize / 2}

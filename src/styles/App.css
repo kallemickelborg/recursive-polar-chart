@@ -4,29 +4,256 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+/* Template */
 body {
   font-family: "Roboto", sans-serif;
   margin: 0;
   padding: 0;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow: hidden;
 }
 
+/* Canvas Layout */
 .app {
   display: flex;
   height: 100vh;
 }
 
 .canvas {
-  display: flex;
-  justify-content: center;
   width: 100vw;
   height: 100vh;
-  overflow: auto;
+  position: relative;
 }
 
 .chart {
   display: flex;
   justify-content: center;
 }
+
+/* Main Content Layout */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.main-content.drawer-open {
+  margin-left: 25%;
+}
+
+/* Infinite Canvas Styles */
+.infinite-canvas-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+}
+
+.infinite-canvas-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.canvas-controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.canvas-zoom-info {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  box-shadow: 0 4px 12px hsl(var(--shadow) / 0.15);
+  backdrop-filter: blur(8px);
+}
+
+.canvas-help {
+  background: hsl(var(--card) / 0.9);
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  box-shadow: 0 4px 12px hsl(var(--shadow) / 0.15);
+  backdrop-filter: blur(8px);
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.canvas-help:hover {
+  opacity: 1;
+}
+
+.canvas-help div {
+  margin-bottom: 4px;
+}
+
+.canvas-help div:last-child {
+  margin-bottom: 0;
+}
+
+/* Canvas navigation controls */
+.canvas-nav-controls {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.nav-button {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  transition: all 0.2s ease;
+  pointer-events: auto;
+  box-shadow: 0 2px 4px hsl(var(--shadow) / 0.1);
+}
+
+.nav-button:hover {
+  background: hsl(var(--accent));
+  border-color: hsl(var(--primary));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px hsl(var(--shadow) / 0.15);
+}
+
+.nav-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px hsl(var(--shadow) / 0.1);
+}
+
+.nav-button.reset-button {
+  font-size: 14px;
+}
+
+/* Enhanced canvas background grid */
+.infinite-canvas-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(circle at 1px 1px, hsl(var(--border) / 0.2) 1px, transparent 0);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Canvas dragging state */
+.infinite-canvas-container.dragging {
+  cursor: grabbing !important;
+}
+
+.infinite-canvas-container.dragging * {
+  cursor: grabbing !important;
+  user-select: none;
+}
+
+/* Smooth transitions for zoom controls */
+.canvas-controls {
+  transition: opacity 0.2s ease;
+}
+
+.infinite-canvas-container:not(:hover) .canvas-controls {
+  opacity: 0.7;
+}
+
+
+
+
+
+
+
+
+
+
+/* REMOVE PLACEHOLDER STYLING BELOW */
+/* REMOVE PLACEHOLDER STYLING BELOW */
+/* REMOVE PLACEHOLDER STYLING BELOW */
+/* REMOVE PLACEHOLDER STYLING BELOW */
+
+
+
+
+
+
+
+
+
+
+
 
 .drawer {
   display: flex;
@@ -41,9 +268,17 @@ body {
   flex-direction: column;
   padding: 1rem;
   width: 100%;
-  height: 100%;
-  overflow-y: scroll;
   gap: 10px;
+}
+
+/* Hide native scrollbars */
+.drawer-content {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.drawer-content::-webkit-scrollbar {
+  display: none;
 }
 
 .drawer-item {
@@ -182,6 +417,7 @@ body {
 
 .plus-button:hover {
   opacity: 1;
+  background-color: black;
 }
 
 .plus-button-center {

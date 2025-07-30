@@ -15,7 +15,6 @@
       "name": "Branch 1",
       "color": "#FF220F",
       "flipText": false,
-      "heightAdjustment": 10,
       "onionLayers": [
         {
           "wedgeLayers": [{ "label": "Label" }, { "label": "Label" }]
@@ -26,7 +25,7 @@
         {
           "wedgeLayers": [
             {
-              "label": "What is the purpose of your organization and how can a vision bring that to life?"
+              "label": "Label"
             }
           ]
         }
@@ -36,7 +35,6 @@
       "name": "Branch 2",
       "color": "#82E600",
       "flipText": false,
-      "heightAdjustment": 10,
       "onionLayers": [
         {
           "wedgeLayers": [{ "label": "Label" }, { "label": "Label" }]
@@ -47,7 +45,7 @@
         {
           "wedgeLayers": [
             {
-              "label": "What is the purpose of your organization and how can a vision bring that to life?"
+              "label": "Label"
             }
           ]
         }
@@ -57,7 +55,6 @@
       "name": "Branch 3",
       "color": "#1736F5",
       "flipText": false,
-      "heightAdjustment": 10,
       "onionLayers": [
         {
           "wedgeLayers": [{ "label": "Label" }, { "label": "Label" }]
@@ -68,7 +65,7 @@
         {
           "wedgeLayers": [
             {
-              "label": "What is the purpose of your organization and how can a vision bring that to life?"
+              "label": "Label"
             }
           ]
         }

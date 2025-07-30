@@ -1,12 +1,19 @@
 // React imports & hooks
 import React, { useState } from "react";
 
+// Components
+import { ThemeToggle } from "./ThemeToggle";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+
 // Styles
 import {
-  GENERAL_CLASSES,
-  BUTTON_CLASSES,
-  INPUT_CLASSES,
-} from "../styles/classes";
+  LAYOUT,
+  TEXT,
+  PATTERNS,
+  btn
+} from "@/styles/components";
 
 const InputForm = ({
   settings,
@@ -90,42 +97,54 @@ const InputForm = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className={LAYOUT.space4}>
+      {/* Theme Toggle */}
+      <div className={LAYOUT.full}>
+        <ThemeToggle />
+      </div>
+
       {/* Canvas Size Settings */}
-      <div className={GENERAL_CLASSES.sectionWrapper}>
+      <div className={`${LAYOUT.full} ${LAYOUT.space3}`}>
         <h2 className="font-semibold text-lg mb-3">Canvas Settings</h2>
 
         {/* Canvas Size */}
-        <div className={GENERAL_CLASSES.sectionWrapper}>
-          <label className={INPUT_CLASSES.formLabel}>
-            Canvas Size: {settings.canvasSize}px
-          </label>
-          <input
-            type="range"
-            min="1000"
-            max="3000"
-            step="100"
-            value={settings.canvasSize}
-            onChange={(e) =>
-              handleSettingChange("canvasSize", Number(e.target.value))
-            }
-            className="w-full"
+        <div className={PATTERNS.slider.section}>
+          <Label htmlFor="canvas-size" className={PATTERNS.slider.label}>
+            <span>Canvas Size</span>
+            <span className={TEXT.value}>
+              {settings.canvasSize}px
+            </span>
+          </Label>
+          <Slider
+            id="canvas-size"
+            min={1000}
+            max={3000}
+            step={100}
+            value={[settings.canvasSize]}
+            onValueChange={(value) => handleSettingChange("canvasSize", value[0])}
+            className={PATTERNS.slider.input}
           />
+          <div className={PATTERNS.slider.ranges}>
+            <span className={TEXT.rangeVal}>1000px</span>
+            <span className="text-center">Chart Canvas Size</span>
+            <span className={TEXT.rangeVal}>3000px</span>
+          </div>
         </div>
       </div>
 
-      {/* Import/Export Settings Accordion */}
-      <div className={GENERAL_CLASSES.sectionWrapper}>
-        <div className={GENERAL_CLASSES.sectionWrapper}>
-          <div className="button-wrapper">
+      {/* Import/Export Settings */}
+      <div className={`${LAYOUT.full} ${LAYOUT.space3}`}>
+        <div className={`${LAYOUT.full} ${LAYOUT.space3}`}>
+          <div className={LAYOUT.column}>
             {/* Export to Excel button */}
-            <button
+            <Button
               onClick={exportToExcel}
               disabled={isLoading}
-              className={BUTTON_CLASSES.buttonWhite}
+              variant="outline"
+              className={btn('full')}
             >
-              Export to Excel
-            </button>
+              📊 Export to Excel
+            </Button>
 
             {/* Import from Excel button */}
             <input
@@ -136,37 +155,41 @@ const InputForm = ({
               id="excel-upload"
               disabled={isLoading}
             />
-            <button
+            <Button
               onClick={() => document.getElementById("excel-upload").click()}
               disabled={isLoading}
-              className={`${BUTTON_CLASSES.buttonWhite} w-full`}
+              variant="outline"
+              className={btn('full')}
             >
-              {isLoading ? "Importing..." : "Import from Excel"}
-            </button>
+              {isLoading ? "⏳ Importing..." : "📁 Import from Excel"}
+            </Button>
 
             {/* Export SVG button */}
-            <button
+            <Button
               onClick={() => exportChart("svg")}
-              className={BUTTON_CLASSES.buttonWhite}
+              variant="outline"
+              className={btn('full')}
             >
-              Export as SVG
-            </button>
+              🖼️ Export as SVG
+            </Button>
 
             {/* Export PNG button */}
-            <button
+            <Button
               onClick={() => exportChart("png")}
-              className={BUTTON_CLASSES.buttonWhite}
+              variant="outline"
+              className={btn('full')}
             >
-              Export as PNG
-            </button>
+              📷 Export as PNG
+            </Button>
 
             {/* Reset Template button */}
-            <button
-              className={BUTTON_CLASSES.buttonRed}
+            <Button
+              variant="destructive"
               onClick={handleResetToDefaults}
+              className={btn('full')}
             >
-              Reset Template
-            </button>
+              🔄 Reset Template
+            </Button>
           </div>
         </div>
       </div>

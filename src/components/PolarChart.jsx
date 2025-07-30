@@ -134,7 +134,7 @@ const LayeredPolarChart = ({
 
   // Calculate which buttons should be visible based on mouse proximity
   useEffect(() => {
-    const proximityRadius = 60; // Show buttons within 60px of cursor
+    const proximityRadius = 100; // Show buttons within 60px of cursor
 
     const visible = plusButtonPositions.filter((position) => {
       const distance = Math.sqrt(
@@ -490,12 +490,19 @@ function drawCommunityBanners(
       .style("fill", "none")
       .style("opacity", 0);
 
+    // Use banner-specific font settings or defaults
+    const bannerFontSizeActual = community.bannerFontSize || bannerFontSize;
+    const bannerFontColor = community.bannerFontColor || "white";
+    const bannerFontWeight = community.bannerFontWeight || "bold";
+    const bannerFontStyle = community.bannerFontStyle || "normal";
+
     const text = svg
       .append("text")
-      .style("font-size", `${bannerFontSize}px`)
+      .style("font-size", `${bannerFontSizeActual}px`)
       .style("font-family", "Roboto, sans-serif")
-      .style("fill", "white")
-      .style("font-weight", "bold")
+      .style("fill", bannerFontColor)
+      .style("font-weight", bannerFontWeight)
+      .style("font-style", bannerFontStyle)
       .attr("data-path", textPathId);
 
     const textPath = text
@@ -527,7 +534,6 @@ function drawCommunitySections(
   data.forEach((community, communityIndex) => {
     const communityAngleStart = (communityIndex * (2 * Math.PI)) / data.length;
     const communityAngleEnd = communityAngleStart + (2 * Math.PI) / data.length;
-    const heightAdjustment = community.heightAdjustment || 0;
 
     let previousLayerOuterRadius = innerRadius + bannerWidth;
     community.onionLayers.forEach((layer, layerIndex) => {
@@ -541,8 +547,7 @@ function drawCommunitySections(
 
       const layerHeight =
         (maxRadius - previousLayerOuterRadius) /
-          (community.onionLayers.length - layerIndex) +
-        heightAdjustment;
+          (community.onionLayers.length - layerIndex);
       const layerOuterRadius = previousLayerOuterRadius + layerHeight;
 
       layer.wedgeLayers.forEach((wedgeLayer, wedgeLayerIndex) => {
@@ -603,7 +608,8 @@ function drawCommunitySections(
             wedgeLayerIndex,
             community,
             data.length,
-            interactions
+            interactions,
+            wedgeLayer // Pass the wedge data
           );
         }
       });
@@ -613,31 +619,88 @@ function drawCommunitySections(
   });
 }
 
-// Helper function to break text into multiple lines based on available width REFACTOR THIS FOR BETTER TEXT BREAKING IN CORRECT ORDER
+// Improved text breaking function that handles word wrapping more intelligently
 function breakTextIntoLines(text, maxCharsPerLine) {
-  const words = text.split(" ");
+  if (!text || maxCharsPerLine < 1) return [text || ""];
+
+  const words = text.trim().split(/\s+/);
   const lines = [];
   let currentLine = "";
 
-  words.forEach((word) => {
-    if ((currentLine + word).length <= maxCharsPerLine) {
-      currentLine += (currentLine ? " " : "") + word;
+  for (const word of words) {
+    // If this is the first word or adding it won't exceed the limit
+    if (!currentLine || (currentLine + " " + word).length <= maxCharsPerLine) {
+      currentLine = currentLine ? currentLine + " " + word : word;
     } else {
-      if (currentLine) {
-        lines.push(currentLine);
-        currentLine = word;
-      } else {
-        lines.push(word);
-      }
+      // Current line is full, start a new line
+      lines.push(currentLine);
+      currentLine = word;
     }
-  });
+  }
 
+  // Add the last line if it has content
   if (currentLine) {
     lines.push(currentLine);
   }
 
-  return lines;
+  return lines.length > 0 ? lines : [""];
 }
+
+// Smart text layout calculation that considers wedge geometry
+function calculateOptimalTextLayout(text, wedgeAngleSpan, textRadius, fontSize) {
+  const arcLength = textRadius * wedgeAngleSpan;
+  const avgCharWidth = fontSize * 0.6; // Approximate character width
+
+  // Calculate available characters, leaving some padding
+  const availableChars = Math.floor((arcLength * 0.85) / avgCharWidth);
+
+  // For very small wedges, use a minimum character count
+  const minCharsPerLine = Math.max(6, Math.floor(availableChars * 0.4));
+  const maxCharsPerLine = Math.max(minCharsPerLine, availableChars);
+
+  // Try different line lengths to find the best fit
+  const words = text.trim().split(/\s+/);
+  const totalChars = text.length;
+
+  // If text is short enough to fit on one line, use it
+  if (totalChars <= maxCharsPerLine) {
+    return { maxCharsPerLine: totalChars, lines: [text] };
+  }
+
+  // Otherwise, find optimal line length
+  let bestLayout = null;
+  let bestScore = Infinity;
+
+  // Try different character limits
+  for (let chars = minCharsPerLine; chars <= maxCharsPerLine; chars += 2) {
+    const lines = breakTextIntoLines(text, chars);
+
+    // Score this layout (prefer fewer lines with more balanced lengths)
+    const lineCount = lines.length;
+    const lengthVariance = calculateLineVariance(lines);
+    const score = lineCount * 2 + lengthVariance; // Weight line count more heavily
+
+    if (score < bestScore) {
+      bestScore = score;
+      bestLayout = { maxCharsPerLine: chars, lines };
+    }
+  }
+
+  return bestLayout || { maxCharsPerLine, lines: breakTextIntoLines(text, maxCharsPerLine) };
+}
+
+// Calculate variance in line lengths to prefer balanced text blocks
+function calculateLineVariance(lines) {
+  if (lines.length <= 1) return 0;
+
+  const lengths = lines.map(line => line.length);
+  const avgLength = lengths.reduce((sum, len) => sum + len, 0) / lengths.length;
+  const variance = lengths.reduce((sum, len) => sum + Math.pow(len - avgLength, 2), 0) / lengths.length;
+
+  return variance;
+}
+
+
 
 function drawLabels(
   svg,
@@ -653,21 +716,21 @@ function drawLabels(
   wedgeLayerIndex,
   communityData,
   totalCommunities,
-  interactions
+  interactions,
+  wedgeData
 ) {
   const shouldFlip = communityData?.flipText || false;
+
+  // Use wedge-specific font settings or defaults
+  const wedgeFontSize = wedgeData?.fontSize || fontSize;
+  const wedgeFontColor = wedgeData?.fontColor || "white";
+  const wedgeFontWeight = wedgeData?.fontWeight || "normal";
+  const wedgeFontStyle = wedgeData?.fontStyle || "normal";
 
   // Calculate available space and text parameters
   const segmentWidth = outerRadius - innerRadius;
   const angleSpan = wedgeEndAngle - wedgeStartAngle;
-  const midAngle = (wedgeStartAngle + wedgeEndAngle) / 2;
-
-  // Determine text radius within the segment
   const textRadius = (innerRadius + outerRadius) / 2;
-  const arcLength = textRadius * angleSpan;
-  const avgCharWidth = fontSize * 0.6;
-  let calculatedMaxChars = Math.floor((arcLength * 0.8) / avgCharWidth);
-  const maxCharsPerLine = Math.max(5, calculatedMaxChars); // Ensure min 5 chars, or calculated
 
   // TEXT FLIPPING LOGIC
   const branchCenterAngle =
@@ -688,83 +751,66 @@ function drawLabels(
     arcEndAngle = wedgeEndAngle - angularPadding;
   }
 
-  // REFACTOR/SIMPLIFY START FOR THE LINE BREAKING LOGIC
   labels.forEach((label, labelIndex) => {
-    const semanticTextLines =
-      maxCharsPerLine > 4 && label.length > maxCharsPerLine
-        ? breakTextIntoLines(label, maxCharsPerLine)
-        : [label];
+    if (!label || label.trim() === "") return;
 
+    // Use smart text layout to get optimal line breaks
+    const layout = calculateOptimalTextLayout(label, angleSpan, textRadius, wedgeFontSize);
+    let textLines = layout.lines;
+
+    // Necessary to fix the line break issue for wedge labels
+    textLines = [...textLines].reverse();
+
+    // Calculate line spacing based on available space
+    const availableHeight = segmentWidth * 0.8; // Use 80% of radial space
     const lineSpacing = Math.min(
-      segmentWidth / Math.max(semanticTextLines.length, 2),
-      fontSize * 1.2
+      availableHeight / Math.max(textLines.length, 1),
+      wedgeFontSize * 1.3
     );
 
-    semanticTextLines.forEach((lineContent, semanticLineIndex) => {
-      let radiusOffsetFactor =
-        semanticLineIndex - (semanticTextLines.length - 1) / 2;
+    // Render each line of text
+    textLines.forEach((lineContent, lineIndex) => {
+      // Calculate radius for this line - position lines in correct reading order
+      const totalLines = textLines.length;
+      const centerOffset = (totalLines - 1) / 2;
 
-      if (actualFlip) {
-        radiusOffsetFactor = -radiusOffsetFactor;
-      }
+      // Simple positioning: first line (index 0) at inner radius, last line at outer radius
+      const lineOffset = (lineIndex - centerOffset) * lineSpacing;
+      let lineRadius = textRadius + lineOffset;
 
-      const radiusOffset = radiusOffsetFactor * (lineSpacing * 0.8);
-
-      let lineRadius = Math.max(
-        innerRadius + segmentWidth * 0.1,
-        Math.min(outerRadius - segmentWidth * 0.1, textRadius + radiusOffset)
+      // Ensure the line stays within the wedge bounds
+      lineRadius = Math.max(
+        innerRadius + segmentWidth * 0.15,
+        Math.min(outerRadius - segmentWidth * 0.15, lineRadius)
       );
 
-      if (!isFinite(lineRadius)) {
-        console.error("Invalid lineRadius:", lineRadius, "Using fallback.", {
-          innerRadius,
-          segmentWidth,
-          textRadius,
-          radiusOffset,
-        });
-        lineRadius = textRadius;
-      }
+      // Create unique IDs for this text line
+      const pathId = `text-arc-${communityIndex}-${layerIndex}-${wedgeLayerIndex}-${labelIndex}-${lineIndex}`;
+      const textId = `text-${communityIndex}-${layerIndex}-${wedgeLayerIndex}-${labelIndex}-${lineIndex}`;
 
-      // REFACTOR FOR ORDERING THE LINES IN THE CORRECT ORDER
-      const pathId = `text-arc-${communityIndex}-${layerIndex}-${wedgeLayerIndex}-${labelIndex}-${semanticLineIndex}`;
-      const textId = `text-${communityIndex}-${layerIndex}-${wedgeLayerIndex}-${labelIndex}-${semanticLineIndex}`;
-
+      // Remove any existing elements with these IDs
       svg.selectAll(`#${pathId}, #${textId}`).remove();
 
-      // Path data string
-      let x1 = lineRadius * Math.cos(arcStartAngle - Math.PI / 2);
-      let y1 = lineRadius * Math.sin(arcStartAngle - Math.PI / 2);
-      let x2 = lineRadius * Math.cos(arcEndAngle - Math.PI / 2);
-      let y2 = lineRadius * Math.sin(arcEndAngle - Math.PI / 2);
+      // Calculate arc coordinates
+      const x1 = lineRadius * Math.cos(arcStartAngle - Math.PI / 2);
+      const y1 = lineRadius * Math.sin(arcStartAngle - Math.PI / 2);
+      const x2 = lineRadius * Math.cos(arcEndAngle - Math.PI / 2);
+      const y2 = lineRadius * Math.sin(arcEndAngle - Math.PI / 2);
 
       const sweepFlag = actualFlip ? 0 : 1;
       const angleDiff = Math.abs(arcEndAngle - arcStartAngle);
-      let largeArcFlag = angleDiff > Math.PI ? 1 : 0;
+      const largeArcFlag = angleDiff > Math.PI ? 1 : 0;
 
-      if (Math.abs(arcStartAngle - arcEndAngle) < 0.001) {
-        if (actualFlip) {
-          arcEndAngle -= 0.001;
-        } else {
-          arcEndAngle += 0.001;
-        }
-        x2 = lineRadius * Math.cos(arcEndAngle - Math.PI / 2);
-        y2 = lineRadius * Math.sin(arcEndAngle - Math.PI / 2);
-      }
-
+      // Validate coordinates
       if (![x1, y1, x2, y2, lineRadius].every(isFinite)) {
-        console.error("Invalid coordinates for pathData:", {
-          x1,
-          y1,
-          x2,
-          y2,
-          lineRadius,
-          pathId,
-        });
+        console.warn("Invalid coordinates for text path, skipping line:", lineContent);
         return;
       }
 
+      // Create the arc path for text
       const pathData = `M ${x1} ${y1} A ${lineRadius} ${lineRadius} 0 ${largeArcFlag} ${sweepFlag} ${x2} ${y2}`;
 
+      // Add the invisible path for text to follow
       svg
         .append("path")
         .attr("id", pathId)
@@ -772,13 +818,17 @@ function drawLabels(
         .style("fill", "none")
         .style("opacity", 0);
 
+      // Add the text element
       const text = svg
         .append("text")
         .attr("id", textId)
-        .style("font-size", `${fontSize}px`)
+        .style("font-size", `${wedgeFontSize}px`)
         .style("font-family", "Roboto, sans-serif")
-        .style("fill", "white");
+        .style("fill", wedgeFontColor)
+        .style("font-weight", wedgeFontWeight)
+        .style("font-style", wedgeFontStyle);
 
+      // Add the text path
       const textPath = text
         .append("textPath")
         .attr("href", `#${pathId}`)
@@ -787,6 +837,7 @@ function drawLabels(
         .style("dominant-baseline", "middle")
         .text(lineContent);
 
+      // Adjust vertical positioning based on flip
       if (actualFlip) {
         textPath.attr("dy", "0.35em");
       } else {
@@ -794,55 +845,9 @@ function drawLabels(
       }
     });
   });
-  // REFACTOR/SIMPLIFY END
 }
 
-function wrapTextCentered(text, label, maxWidth, fontSize) {
-  text.text("");
-  const words = label.split(" ");
-  let line = [];
-  let tspan = text
-    .append("tspan")
-    .attr("x", 0)
-    .attr("dy", 0)
-    .style("text-anchor", "middle")
-    .style("dominant-baseline", "middle");
 
-  let lineNumber = 0;
-  let currentLine = [];
-
-  words.forEach((word, i) => {
-    currentLine.push(word);
-    tspan.text(currentLine.join(" "));
-
-    if (
-      tspan.node().getComputedTextLength() > maxWidth ||
-      i === words.length - 1
-    ) {
-      if (tspan.node().getComputedTextLength() > maxWidth) {
-        currentLine.pop();
-        tspan.text(currentLine.join(" "));
-
-        // Start a new line with the current word
-        if (currentLine.length > 0) {
-          lineNumber++;
-          tspan = text
-            .append("tspan")
-            .attr("x", 0)
-            .attr("dy", `${fontSize * 1.2}px`)
-            .style("text-anchor", "middle")
-            .style("dominant-baseline", "hanging")
-            .text(word);
-          currentLine = [word];
-        }
-      }
-    }
-  });
-
-  // Center the text vertically
-  const textHeight = lineNumber * fontSize * 1.2;
-  text.attr("transform", `translate(0, ${-textHeight / 2}px)`);
-}
 
 // CALCULATES LAYER COLOR BASED ON THE BASE COLOR AND THE LAYER INDEX
 function calculateLayerColor(baseColor, layerIndex, totalLayers) {
@@ -870,3 +875,6 @@ const hexToRgb = (hex) => {
 };
 
 export default LayeredPolarChart;
+
+
+

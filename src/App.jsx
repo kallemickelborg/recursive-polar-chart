@@ -5,13 +5,14 @@ import InputForm from "./components/InputForm";
 import LayeredPolarChart from "./components/PolarChart";
 import Drawer from "./components/Drawer";
 import ContextualSettingsPanel from "./components/ContextualSettingsPanel";
+import InfiniteCanvas from "./components/InfiniteCanvas";
+import { ThemeProvider } from "./components/ThemeProvider";
 
 // Hooks
 import useChartData from "./components/FunctionHandler";
 
 // Styles
-import "@/styles/App.css";
-import { BUTTON_CLASSES } from "@/styles/classes";
+import "./styles/App.css";
 
 const App = () => {
   const {
@@ -26,6 +27,7 @@ const App = () => {
     addWedgeLayer,
     removeWedgeLayer,
     handleLabelChange,
+    handleWedgeFontChange,
     resetToDefaults,
     exportToExcel,
     importFromExcel,
@@ -112,7 +114,8 @@ const App = () => {
   }, [data, settings, dataVersion]);
 
   return (
-    <div className="app">
+    <ThemeProvider defaultTheme="light" storageKey="polar-chart-theme">
+      <div className="app bg-background text-foreground">
       {isLoading && (
         <div className="loading-overlay">
           <div className="loading-spinner"></div>
@@ -143,6 +146,7 @@ const App = () => {
         updateSettings={updateSettings}
         handleBranchChange={handleBranchChange}
         handleLabelChange={handleLabelChange}
+        handleWedgeFontChange={handleWedgeFontChange}
         addOnionLayer={addOnionLayer}
         removeOnionLayer={removeOnionLayer}
         addWedgeLayer={addWedgeLayer}
@@ -153,17 +157,17 @@ const App = () => {
       <div className={`main-content ${isDrawerOpen ? "drawer-open" : ""}`}>
         <button
           onClick={toggleDrawer}
-          className={`${BUTTON_CLASSES.drawerBase} ${
+          className={`fixed top-4 z-[1000] focus:outline-none focus:ring-4 font-medium px-5 py-2.5 rounded-lg text-center text-sm transition-all duration-300 ${
             isDrawerOpen
-              ? BUTTON_CLASSES.buttonClose
-              : BUTTON_CLASSES.buttonOpen
+              ? "left-[calc(1rem+25%)] bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              : "left-4 bg-primary hover:bg-primary/90 text-primary-foreground"
           }`}
         >
-          {isDrawerOpen ? "Close Settings" : "Open Settings"}
+          {isDrawerOpen ? "Close" : "Export Settings"}
         </button>
 
         <div className="canvas">
-          <div>
+          <InfiniteCanvas>
             <LayeredPolarChart
               data={data}
               size={settings.canvasSize}
@@ -183,10 +187,11 @@ const App = () => {
               selectedElement={selectedElement}
               key={dataVersion}
             />
-          </div>
+          </InfiniteCanvas>
         </div>
       </div>
     </div>
+    </ThemeProvider>
   );
 };
 

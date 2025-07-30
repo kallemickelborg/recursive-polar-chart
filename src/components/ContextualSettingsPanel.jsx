@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
+import { DraggableDialog } from "@/components/ui/draggable-dialog";
 import CenterSettings from "./CenterSettings";
 import BranchSettings from "./BranchSettings";
 import WedgeSettings from "./WedgeSettings";
@@ -11,30 +12,16 @@ const ContextualSettingsPanel = ({
   updateSettings,
   handleBranchChange,
   handleLabelChange,
+  handleWedgeFontChange,
   addOnionLayer,
   removeOnionLayer,
   removeWedgeLayer,
   onDeleteBranch,
 }) => {
-  const panelRef = useRef(null);
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (panelRef.current && !panelRef.current.contains(event.target)) {
-        onClose();
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [onClose]);
-
-  if (!selectedElement) {
-    return null;
-  }
 
   const renderSettingsContent = () => {
+    if (!selectedElement) return null;
+
     switch (selectedElement.type) {
       case "center":
         return (
@@ -58,6 +45,7 @@ const ContextualSettingsPanel = ({
             onRemoveLayer={removeOnionLayer}
             onClose={onClose}
             onDeleteBranch={onDeleteBranch}
+            defaultBannerFontSize={settings.bannerFontSize}
           />
         );
 
@@ -100,28 +88,23 @@ const ContextualSettingsPanel = ({
             branchName={wedgeBranch.name}
             branchData={wedgeBranch}
             onLabelChange={handleLabelChange}
+            onWedgeFontChange={handleWedgeFontChange}
             onRemoveWedge={removeWedgeLayer}
             onClose={onClose}
+            defaultFontSize={settings.fontSize}
           />
         );
     }
   };
 
-  return (
-    <>
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-black bg-opacity-25 z-40" />
+  if (!selectedElement) {
+    return null;
+  }
 
-      {/* Settings Panel FORMAT FOR BETTER UI/UX */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div
-          ref={panelRef}
-          className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[80vh] overflow-y-auto"
-        >
-          <div className="p-6">{renderSettingsContent()}</div>
-        </div>
-      </div>
-    </>
+  return (
+    <DraggableDialog open={!!selectedElement} onOpenChange={onClose}>
+      {renderSettingsContent()}
+    </DraggableDialog>
   );
 };
 
