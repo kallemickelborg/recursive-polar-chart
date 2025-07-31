@@ -1,11 +1,12 @@
 # Recursive multi-layered Polar-Chart framework
 
-This project introduces an interactive and recursive polarchart designed to map organizational structures, processes, values, and missions. Inspired by Simon Sinek's "Start with Why" concept, it provides a framework that can be used to illustrate components of organizations, technologies, offering a comprehensive view of the entire structure.
+This project introduces an interactive and recursive polarchart designed to map organizational structures, processes, values, and missions. This tools is useful for Management Consultants looking to map structures and/or processes in a circular graphical model (polar/radar chart). This can be used to create elements for PowerPoint presentations, reports or as standalone deliverables.
 
 ## Features
 
-- Recursive multi-layer polarchart frontend editor
-- Real-time update in SVG format using D3.js
+- Excalidraw & Miro-like Infinite canvas for chart navigation
+- Recursive multi-layer polarchart graphical editor
+- Entirely modularized customization for each element and componend of the chart
 - Export options (SVG and PNG)
 - Cached data to resume session
 - Excel Import/Export
@@ -14,7 +15,7 @@ This project introduces an interactive and recursive polarchart designed to map 
 
 - React + Vite
 - D3.js for visualization
-- Tailwind CSS for styling
+- Shadcn UI for components (including Tailwind)
 - WebFont for Google Fonts
 
 ## Getting Started
@@ -46,3 +47,12 @@ The polar-chart allows users to:
 - Export the chart as SVG or PNG
 - Export as .xlsx to edit in Excel
 - Import .xlsx files to update polar-chart
+
+## To-do
+
+- [ ] Improve naming conventions and typology for chart elements
+- [ ] Fix dialog pop-up centering
+- [ ] Remove unused components
+- [ ] Add chart spacing options
+- [ ] Add tutorial video
+
